@@ -1,0 +1,24 @@
+{
+  "id": "crash_store",
+  "version": 1,
+  "family": "F1",
+  "stage": "development",
+  "languages": [
+    "ruby",
+    "rust"
+  ],
+  "critical_groups": [
+    "atomicity",
+    "snapshots",
+    "reclamation",
+    "capacity",
+    "recovery"
+  ],
+  "cases_module": "cases.py",
+  "contract": "CONTRACT.md",
+  "editable_paths": [
+    "src/**"
+  ],
+  "build_timeout_seconds": 120,
+  "case_timeout_seconds": 5
+}

@@ -1,0 +1,7 @@
+.slim/deepwork/
+__pycache__/
+*.py[cod]
+.venv/
+results/
+.work/
+**/target/

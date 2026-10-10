@@ -1,0 +1,24 @@
+{
+  "id": "protocol_migration",
+  "family": "F4",
+  "version": 1,
+  "languages": [
+    "ruby",
+    "rust"
+  ],
+  "critical_groups": [
+    "compatibility",
+    "authorization",
+    "identity",
+    "presence",
+    "lifecycle",
+    "cache",
+    "migration"
+  ],
+  "build_timeout_seconds": 120,
+  "case_timeout_seconds": 5,
+  "stage": "development",
+  "editable_paths": [
+    "src/**"
+  ]
+}

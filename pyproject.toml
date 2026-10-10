@@ -1,0 +1,27 @@
+[project]
+name = "languages-benchmark"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "Controlled language coding benchmark and private grading harness"
+
+[project.scripts]
+langbench = "langbench.__main__:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["langbench", "langbench_tasks", "langbench_config"]
+include-package-data = false
+
+[tool.setuptools.package-dir]
+langbench_tasks = "tasks"
+langbench_config = "configs"
+
+[tool.setuptools.package-data]
+langbench_tasks = ["*/CONTRACT.md", "*/VALIDATION.md", "*/task.json", "*/cases.py", "*/starters/*/*.sh", "*/starters/*/Cargo.*", "*/starters/*/README.md", "*/starters/*/src/*", "*/references/*/*.sh", "*/references/*/Cargo.*", "*/references/*/src/*"]
+langbench_config = ["*.json"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["**/target/**", "**/__pycache__/**", "**/*.pyc", "**/.git/**"]

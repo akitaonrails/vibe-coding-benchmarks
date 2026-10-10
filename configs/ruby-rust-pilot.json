@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "languages": [
+    "ruby",
+    "rust"
+  ],
+  "tasks": [
+    "crash_store",
+    "protocol_migration"
+  ],
+  "test_conditions": [
+    "T0",
+    "T1"
+  ],
+  "models": [
+    {
+      "requested": "gpt-6-astra",
+      "effort": "low"
+    },
+    {
+      "requested": "gpt-6-sol",
+      "effort": "medium"
+    },
+    {
+      "requested": "gpt-6-luna",
+      "effort": "high"
+    }
+  ],
+  "base_seconds": 2700,
+  "continuation_seconds_each": 900,
+  "max_nudges": 2,
+  "auth_mode": "chatgpt",
+  "scored_execution_qualified": false,
+  "replicates": 2,
+  "block_prefix": "development-pilot",
+  "semantic_seed_base": 20261010
+}
