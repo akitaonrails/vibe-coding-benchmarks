@@ -64,6 +64,50 @@ class LiveAdapterTests(unittest.TestCase):
             adapter,_,worker=self.adapter(temp,[tool('host_shell')])
             self.assertEqual(adapter.invoke('task',None,10)['status'],'infrastructure_error')
             self.assertEqual(worker.commands,[])
+    def test_invalid_shell_arguments_are_recoverable_and_never_executed(self):
+        invalid=[{'command':'sleep 200','timeout_seconds':200},
+                 {'command':'echo nope','timeout_seconds':True},
+                 {'command':'echo nope','extra':1}, {'command':42}, None,
+                 {'command':'x' * 131073}, {'command':'é' * 65537},
+                 {'command':'echo\x00bad'}, {'command':'\ud800'}]
+        for args in invalid:
+            with self.subTest(args_type=type(args).__name__), tempfile.TemporaryDirectory() as temp:
+                rejected=tool();rejected['params']['arguments']=args
+                accepted=tool();accepted['id']=11;accepted['params']['callId']='call-2'
+                adapter,server,worker=self.adapter(temp,[rejected,accepted,terminal()])
+                result=adapter.invoke('task',None,10)
+                self.assertEqual(result['status'],'handoff')
+                self.assertEqual(worker.commands,['sh build.sh'])
+                self.assertEqual(result['tool_call_count'],2)
+                self.assertEqual(result['rejected_tool_call_count'],1)
+                self.assertFalse(result['tool_calls'][0]['executed'])
+                self.assertEqual(result['tool_calls'][0]['termination'],'invalid_arguments')
+                self.assertFalse(server.sent[0]['result']['success'])
+                self.assertTrue(server.sent[1]['result']['success'])
+                self.assertFalse(any(method=='turn/interrupt' for method,_ in server.calls))
+    def test_queued_bad_calls_cannot_extend_turn_deadline(self):
+        request=tool();request['params']['arguments']={'command':'x','timeout_seconds':200}
+        with tempfile.TemporaryDirectory() as temp:
+            adapter,server,worker=self.adapter(temp,[request,tool(),terminal()])
+            clock=[0.0]
+            original_send=server.send
+            def send(message,**kwargs):
+                original_send(message,**kwargs)
+                self.assertEqual(kwargs.get('deadline'),1.0)
+                clock[0]=2.0
+            server.send=send
+            with patch('langbench.live.time.monotonic',side_effect=lambda:clock[0]):
+                result=adapter.invoke('task',None,1)
+            self.assertEqual(result['status'],'timeout')
+            self.assertEqual(result['rejected_tool_call_count'],1)
+            self.assertEqual(worker.commands,[])
+    def test_wrong_tool_identity_stays_fatal_even_with_invalid_arguments(self):
+        for identity in ('threadId','turnId'):
+            with self.subTest(identity=identity), tempfile.TemporaryDirectory() as temp:
+                request=tool();request['params'][identity]='wrong';request['params']['arguments']=None
+                adapter,server,worker=self.adapter(temp,[request,terminal()])
+                self.assertEqual(adapter.invoke('task',None,10)['status'],'infrastructure_error')
+                self.assertEqual(worker.commands,[])
     def test_usage_total_last_preserved_without_summing(self):
         usage={'total':{'inputTokens':12,'outputTokens':8,'reasoningOutputTokens':6,'totalTokens':20},'last':{'inputTokens':4,'totalTokens':7}}
         event={'method':'thread/tokenUsage/updated','params':{'threadId':'thread-1','turnId':'turn-1','tokenUsage':usage}}

@@ -115,6 +115,7 @@ class Adapter:
             for item in turn.get('items',[]):check_item(item)
             events.append({'type':'turn.started','turn_id':turn_id,'monotonic_seconds':0})
             while True:
+                if time.monotonic()>=deadline:raise TimeoutError('turn budget exhausted')
                 message=self.server.next(deadline)
                 method=message.get('method');params=message.get('params',{})
                 if not method:raise ProtocolViolation('unexpected RPC reply during turn')
@@ -146,10 +147,26 @@ class Adapter:
                     if params.get('tool')!='sandbox_shell' or params.get('namespace') not in (None,''):
                         raise ProtocolViolation('unexpected dynamic tool request')
                     args=params.get('arguments')
-                    if not isinstance(args,dict) or set(args)-{'command','timeout_seconds'} or not isinstance(args.get('command'),str) or len(args['command'])>131072:
-                        raise ProtocolViolation('invalid sandbox shell arguments')
-                    requested=args.get('timeout_seconds',60)
-                    if type(requested) is not int or not 1<=requested<=120:raise ProtocolViolation('invalid tool timeout')
+                    argument_error=None
+                    if (not isinstance(args,dict) or set(args)-{'command','timeout_seconds'}
+                        or not isinstance(args.get('command'),str)
+                        or len(args['command'].encode('utf-8',errors='surrogatepass'))>131072
+                        or '\x00' in args['command']
+                        or any('\ud800'<=char<='\udfff' for char in args['command'])):
+                        argument_error='Expected command as a string of at most 131072 UTF-8 bytes without NUL or invalid Unicode, and optional integer timeout_seconds (1..120); no other fields.'
+                    requested=args.get('timeout_seconds',60) if isinstance(args,dict) else 60
+                    if argument_error is None and (type(requested) is not int or not 1<=requested<=120):
+                        argument_error='timeout_seconds must be an integer from 1 through 120. Correct the arguments and retry.'
+                    if argument_error is not None:
+                        # Ordinary schema mistakes are model feedback, not an isolation
+                        # violation. Identity/capability checks above remain fatal.
+                        record={'command':args.get('command') if isinstance(args,dict) else None,
+                                'call_id':params.get('callId'),'turn_id':turn_id,'seconds':0,
+                                'executed':False,'rejected':True,'error':argument_error,
+                                'returncode':None,'termination':'invalid_arguments'}
+                        calls.append(record);self.tool_calls.append(record)
+                        self.server.send({'id':message['id'],'result':{'contentItems':[{'type':'inputText','text':json.dumps({'error':argument_error,'executed':False})}], 'success':False}},deadline=deadline)
+                        continue
                     remaining=deadline-time.monotonic()
                     if remaining<=0:raise TimeoutError('turn budget exhausted')
                     outcome=self.worker.execute(args['command'],timeout=min(requested,remaining),output_limit=256*1024)
@@ -186,7 +203,7 @@ class Adapter:
                 self.export();artifact_available=True
             except (RuntimeError,ValueError,OSError):error='artifact_export_failed';status='infrastructure_error'
         return {'status':status,'session_id':self.thread,'turn_id':turn_id,'seconds':active_seconds,'events':events,
-                'tool_calls':calls,'tool_call_count':len(calls),'tool_seconds':sum(call['seconds'] for call in calls),
+                'tool_calls':calls,'tool_call_count':len(calls),'rejected_tool_call_count':sum(bool(call.get('rejected')) for call in calls),'tool_seconds':sum(call['seconds'] for call in calls),
                 'artifact_available':artifact_available,'error':error,
                 'raw_usage_updates':[event for event in events if event.get('method')=='thread/tokenUsage/updated'],
                 'raw_thread_cumulative':next((event['params'].get('tokenUsage',{}).get('total') for event in reversed(events) if event.get('method')=='thread/tokenUsage/updated'),None),
