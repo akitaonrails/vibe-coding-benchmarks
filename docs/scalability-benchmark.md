@@ -81,3 +81,22 @@ The current JSONL ledger grader is deliberately unsuitable for measuring real co
 ### Development contract decisions
 
 The first runnable slice uses finite per-delivery HTTP attempts and backoff, followed by requeue for healthy events whose transient outage persists; exhausting a local retry budget must not silently classify a healthy event as poison. The sink's explicit poison response is the sole poison classification. Publish poison events durably to the dead-letter queue with confirmation before acknowledging their input delivery. Concurrency limits apply across all worker processes. Fault validation records durable sink attempts/completions and broker state; final deduplicated effects alone cannot prove correct acknowledgement timing. Initial small runs qualify instrumentation only; load/duration controls are required before reporting capacity or soak results.
+
+### Installation boundary
+
+The Python wheel includes the `scalability` runner, public contract and trusted
+broker/sink support assets. `queuebench --help` and
+`python -m scalability.runner --help` expose the same CLI. Installed trials consume
+prebuilt worker images. Building native worker images requires this source
+checkout; those language-specific build trees are deliberately excluded from the
+wheel. Worker images contain their own application and pinned dependencies, never
+the private controller assets.
+
+The first protected failure hook raises a work-item exception (a Rust task panic,
+an Elixir callback exception, or a Ruby delivery exception). An outer failure
+boundary may recover it. This measures handler-failure recovery; it does not
+prove replacement of an arbitrarily killed BEAM process or Ruby thread. Those
+stronger child-death faults, restart storms, replicated-broker partitions and
+multi-host scaling remain separate extensions. A callback rescue can satisfy
+this first contract without reproducing an OTP supervision tree; record that
+outcome rather than redefining it as architectural convergence.

@@ -18,9 +18,9 @@ class PackagingTests(unittest.TestCase):
             source = base / 'source'
             source.mkdir()
             shutil.copyfile(ROOT / 'pyproject.toml', source / 'pyproject.toml')
-            for name in ('langbench', 'tasks', 'configs'):
+            for name in ('langbench', 'tasks', 'configs', 'scalability'):
                 shutil.copytree(ROOT / name, source / name,
-                                ignore=shutil.ignore_patterns('target', '__pycache__', '*.pyc'))
+                                ignore=shutil.ignore_patterns('target', '__pycache__', '*.pyc', 'workers'))
             built = subprocess.run([sys.executable, '-m', 'pip', 'wheel', '--no-deps', '--no-build-isolation',
                                    '--no-index', '--wheel-dir', str(base / 'wheels'), str(source)],
                                   text=True, capture_output=True, timeout=60)
@@ -31,12 +31,19 @@ class PackagingTests(unittest.TestCase):
                 self.assertIn('langbench_tasks/crash_store/cases.py', paths)
                 self.assertIn('langbench_tasks/protocol_migration/references/rust/src/solution.rs', paths)
                 self.assertIn('langbench_config/ruby-rust-pilot.json', paths)
+                for asset in ('runner.py','CONTRACT.md','requirements.txt','infra/Dockerfile','infra/sink.py','infra/producer.py'):
+                    self.assertIn('scalability/'+asset,paths)
+                self.assertFalse(any(p.startswith('scalability/workers/') for p in paths))
                 self.assertFalse(any('/target/' in p or '__pycache__' in p or p.endswith('.pyc') for p in paths))
             target = base / 'installed'
             installed = subprocess.run([sys.executable, '-m', 'pip', 'install', '--no-deps', '--no-index',
                                         '--target', str(target), str(wheel)], text=True, capture_output=True, timeout=60)
             self.assertEqual(installed.returncode, 0, installed.stderr)
             env = dict(os.environ, PYTHONPATH=str(target), PYTHONDONTWRITEBYTECODE='1')
+            queue_help = subprocess.run([sys.executable, '-m', 'scalability.runner', '--help'], cwd=base,
+                                        env=env, text=True, capture_output=True, timeout=30)
+            self.assertEqual(queue_help.returncode,0,queue_help.stderr)
+            self.assertIn('usage:',queue_help.stdout)
             def cli(*args):
                 result = subprocess.run([sys.executable, '-m', 'langbench', *args], cwd=base,
                                         env=env, text=True, capture_output=True, timeout=30)

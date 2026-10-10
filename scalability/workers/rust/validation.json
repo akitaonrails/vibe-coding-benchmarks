@@ -1,0 +1,235 @@
+{
+  "kind": "native_reference_development_validation",
+  "language": "rust",
+  "capacity_qualified": false,
+  "trials": [
+    {
+      "scenario": "clean",
+      "receipt": "results/queue-rust-clean-counterfixed/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 96,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 8,
+        "http_concurrency_verified": true,
+        "drained": true,
+        "http_attempts": 96,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:5c3854ab62ebe5584dd534bd2aa046a6507b76d58f100b6c72449b91257d66a2",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:54bfbeaea2e943b0d066d9e0686097980d1ad86dd2c1dd4784c87cd79f4a6055"
+      }
+    },
+    {
+      "scenario": "slow",
+      "receipt": "results/queue-rust-slow-counterfixed/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 96,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 8,
+        "http_concurrency_verified": true,
+        "drained": true,
+        "http_attempts": 96,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:5c3854ab62ebe5584dd534bd2aa046a6507b76d58f100b6c72449b91257d66a2",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:54bfbeaea2e943b0d066d9e0686097980d1ad86dd2c1dd4784c87cd79f4a6055"
+      }
+    },
+    {
+      "scenario": "lost_response",
+      "receipt": "results/queue-rust-lost_response/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 96,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 8,
+        "http_concurrency_verified": null,
+        "drained": true,
+        "http_attempts": 192,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:5c3854ab62ebe5584dd534bd2aa046a6507b76d58f100b6c72449b91257d66a2",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:60d11f6dcc0701f3157351999f8bf4dbf2d265316be9a6979697141aa3e5828c"
+      }
+    },
+    {
+      "scenario": "kill_poison",
+      "receipt": "results/queue-rust-kill_poison/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 90,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 11,
+        "http_concurrency_verified": null,
+        "drained": true,
+        "http_attempts": 104,
+        "deadletter_copies": 6,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:5c3854ab62ebe5584dd534bd2aa046a6507b76d58f100b6c72449b91257d66a2",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:60d11f6dcc0701f3157351999f8bf4dbf2d265316be9a6979697141aa3e5828c"
+      }
+    },
+    {
+      "scenario": "broker_restart",
+      "receipt": "results/queue-rust-broker_restart/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 96,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 24,
+        "http_concurrency_verified": null,
+        "drained": true,
+        "http_attempts": 127,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:5c3854ab62ebe5584dd534bd2aa046a6507b76d58f100b6c72449b91257d66a2",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:60d11f6dcc0701f3157351999f8bf4dbf2d265316be9a6979697141aa3e5828c"
+      }
+    },
+    {
+      "scenario": "shutdown",
+      "receipt": "results/queue-rust-shutdown/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 96,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 10,
+        "http_concurrency_verified": null,
+        "drained": true,
+        "http_attempts": 104,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:5c3854ab62ebe5584dd534bd2aa046a6507b76d58f100b6c72449b91257d66a2",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:60d11f6dcc0701f3157351999f8bf4dbf2d265316be9a6979697141aa3e5828c"
+      }
+    },
+    {
+      "scenario": "handler_crash",
+      "receipt": "results/queue-rust-handler_crash/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 96,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 9,
+        "http_concurrency_verified": null,
+        "drained": true,
+        "http_attempts": 104,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:5c3854ab62ebe5584dd534bd2aa046a6507b76d58f100b6c72449b91257d66a2",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:60d11f6dcc0701f3157351999f8bf4dbf2d265316be9a6979697141aa3e5828c"
+      },
+      "handler_exception": {
+        "container_unchanged": true,
+        "hook_execution_supported_by_review_and_trace": true,
+        "healthy_other_tenant_effects_after_fault": 64
+      }
+    }
+  ],
+  "starter_clean": {
+    "receipt": "results/queue-rust-starter-clean/result.json",
+    "validity": "valid_development",
+    "verdict": {
+      "success": true,
+      "publication_missing": [],
+      "accepted": 96,
+      "correct_effects": 96,
+      "missing_effects": [],
+      "missing_poison": [],
+      "incorrect_effects": [],
+      "incorrect_deadletters": [],
+      "wrong_attempts": 0,
+      "peak_observed_sink_handlers": 1,
+      "http_concurrency_verified": true,
+      "drained": true,
+      "http_attempts": 96,
+      "deadletter_copies": 0,
+      "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+    },
+    "images": {
+      "worker": "sha256:3916efbd43a10b8645c9c569f201f3af490fd77d310c7e4e52371a84e7f0f668",
+      "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+      "infra": "sha256:54bfbeaea2e943b0d066d9e0686097980d1ad86dd2c1dd4784c87cd79f4a6055"
+    }
+  },
+  "limitations": [
+    "96-event development qualification only; no sustainable capacity or ecosystem ranking.",
+    "Handler hook raises a recoverable work-item exception, not an uncatchable worker/thread termination.",
+    "Native references are not evidence of model coding effort.",
+    "Original evaluator counter-race receipts and Elixir CA packaging failure remain preserved in results/."
+  ],
+  "controlled_coding_trial": false,
+  "artifact_provenance": "Reference authored during benchmark development with coding-agent assistance; not a blinded or budget-matched participant attempt."
+}

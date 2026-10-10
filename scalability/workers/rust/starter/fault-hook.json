@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "path": "src/fault.rs",
+  "sha256": "ececf0a087eb46ab69cf6ea95b282edde6f2ceff0e86f4cb892956be8d80353a",
+  "trigger_header": "X-Langbench-Fault: handler-crash",
+  "trace_marker": "LANGBENCH_HANDLER_CRASH",
+  "invocation": "Immediately after HTTP response, before response classification or retry handling.",
+  "raised_exception": "Rust panic unwind",
+  "reference_recovery": "Bounded handler task join failure closes session; outer reconnect resumes same process."
+}

@@ -51,7 +51,7 @@ python3 -m langbench report results/ruby-t1/result.json
 inference. All four bounded Ruby/Rust × T0/T1 smoke cells passed the 44-case F4 grading
 suite at their initial checkpoint and after both nudges; the suite includes 20
 public and 24 withheld cases. This is development qualification, not evidence for
-a language ranking. The default six-cell ledger calibration and legacy 48-cell smoke plan have not been launched. The observed three-minute initial budget was a toolchain smoke budget. Two fixed generic nudges get
+a language ranking. Two subsequent Astra-low T1 ledger trials also passed initially; the full six-cell calibration and legacy 48-cell smoke plans have not been launched. See [ledger calibration evidence](docs/ledger-calibration.md). The observed three-minute initial budget was a toolchain smoke budget. Two fixed generic nudges get
 separate snapshots. Request-level provider counts reconcile for these pinned traces (cached input
 included; not billing or invisible compute). Generic token accounting remains
 unqualified, and a worker timeout that
@@ -72,12 +72,28 @@ runner validates and freezes the selected plan, records durable progress, and
 stops on infrastructure/quota incidents without retries. No batch or full pilot
 has been launched. See the implementation document before selecting larger runs.
 
+## Queue scalability track
+
+A separate real RabbitMQ experiment compares Elixir/OTP/Broadway, Rust/Tokio/Lapin,
+Rails/Bunny and a plain Ruby/Bunny control. It tests bounded concurrency, durable
+completion, lost responses, poison messages, process/broker recovery and shutdown.
+Read [the design](docs/scalability-benchmark.md) and
+[implementation status](docs/scalability-implementation.md). These reference
+qualifications do not establish AI coding effort or sustainable capacity.
+
+```sh
+python3 -m scalability.runner setup
+docker build -t langbench-queue-elixir:reference scalability/workers/elixir/reference
+python3 -m scalability.runner run langbench-queue-elixir:reference results/queue-clean --scenario clean
+```
+
 ## Contents
 
 - `langbench/`: bundle preparation, process supervision, grading, manifests, event accounting, fixed-nudge collection and descriptive reports.
 - `tasks/crash_store/`: logical page publication, durable snapshots, capacity pressure and interrupted reclamation.
 - `tasks/protocol_migration/`: working v1 service to migrate across wire/domain/repository/worker boundaries; scoped IDs, authorization, absent/null values, cancellation and retry generations.
 - `tasks/ledger_engine/`: snapshot transactions, conflict validation, durable journal replay and checkpoint migration; a difficulty calibration candidate.
+- `scalability/`: isolated RabbitMQ runner, durable sink, fault injection and four native stack fixtures.
 - `tests/`: oracle anchors, Ruby/Rust parity, semantic mutants and instrumentation/boundary tests.
 - `configs/`: pilot roster and execution budgets. A generated plan is not an instruction to launch the full matrix.
 - `docs/`: research, protocol, task designs, rollout and implementation evidence.

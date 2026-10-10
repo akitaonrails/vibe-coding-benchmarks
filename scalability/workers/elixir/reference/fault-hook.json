@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "path": "lib/fault.ex",
+  "sha256": "d701a3c246cef2443614ce89d9aac6f1e325cb824e23a9d1fba8a04db1c095a6",
+  "trigger_header": "X-Langbench-Fault: handler-crash",
+  "trace_marker": "LANGBENCH_HANDLER_CRASH",
+  "invocation": "Immediately after HTTP response, before response classification or retry handling.",
+  "raised_exception": "Elixir RuntimeError",
+  "reference_recovery": "Broadway catches handle_message failure, logs exception and requeues via failed-message acknowledgement."
+}

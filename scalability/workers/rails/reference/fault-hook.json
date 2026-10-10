@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "path": "lib/handler_fault.rb",
+  "sha256": "5bdd4cc214f8ce62f4fc81b44c3b71359e0c3203c8d45faff611a95bb8691f33",
+  "invocation": "lib/worker.rb: post-response before HTTP status handling",
+  "raised_exception": "HandlerFaultHook::InjectedHandlerFailure",
+  "trace_marker": "langbench_handler_fault: raising InjectedHandlerFailure",
+  "reference_recovery": "outer consumer callback rescue delays and rejects/requeues without container restart"
+}

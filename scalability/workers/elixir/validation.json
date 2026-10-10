@@ -1,0 +1,235 @@
+{
+  "kind": "native_reference_development_validation",
+  "language": "elixir",
+  "capacity_qualified": false,
+  "trials": [
+    {
+      "scenario": "clean",
+      "receipt": "results/queue-elixir-clean-cafixed/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 96,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 8,
+        "http_concurrency_verified": true,
+        "drained": true,
+        "http_attempts": 96,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:17d943355aaa4c24dbd7f9c9784f38cc25c43c52572d8e27a0a54ef9129b4005",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:54bfbeaea2e943b0d066d9e0686097980d1ad86dd2c1dd4784c87cd79f4a6055"
+      }
+    },
+    {
+      "scenario": "slow",
+      "receipt": "results/queue-elixir-slow/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 96,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 8,
+        "http_concurrency_verified": true,
+        "drained": true,
+        "http_attempts": 96,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:17d943355aaa4c24dbd7f9c9784f38cc25c43c52572d8e27a0a54ef9129b4005",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:54bfbeaea2e943b0d066d9e0686097980d1ad86dd2c1dd4784c87cd79f4a6055"
+      }
+    },
+    {
+      "scenario": "lost_response",
+      "receipt": "results/queue-elixir-lost_response/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 96,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 6,
+        "http_concurrency_verified": null,
+        "drained": true,
+        "http_attempts": 192,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:17d943355aaa4c24dbd7f9c9784f38cc25c43c52572d8e27a0a54ef9129b4005",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:54bfbeaea2e943b0d066d9e0686097980d1ad86dd2c1dd4784c87cd79f4a6055"
+      }
+    },
+    {
+      "scenario": "kill_poison",
+      "receipt": "results/queue-elixir-kill_poison/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 90,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 8,
+        "http_concurrency_verified": null,
+        "drained": true,
+        "http_attempts": 104,
+        "deadletter_copies": 6,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:17d943355aaa4c24dbd7f9c9784f38cc25c43c52572d8e27a0a54ef9129b4005",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:54bfbeaea2e943b0d066d9e0686097980d1ad86dd2c1dd4784c87cd79f4a6055"
+      }
+    },
+    {
+      "scenario": "broker_restart",
+      "receipt": "results/queue-elixir-broker_restart/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 96,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 24,
+        "http_concurrency_verified": null,
+        "drained": true,
+        "http_attempts": 144,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:17d943355aaa4c24dbd7f9c9784f38cc25c43c52572d8e27a0a54ef9129b4005",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:54bfbeaea2e943b0d066d9e0686097980d1ad86dd2c1dd4784c87cd79f4a6055"
+      }
+    },
+    {
+      "scenario": "shutdown",
+      "receipt": "results/queue-elixir-shutdown/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 96,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 8,
+        "http_concurrency_verified": null,
+        "drained": true,
+        "http_attempts": 96,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:17d943355aaa4c24dbd7f9c9784f38cc25c43c52572d8e27a0a54ef9129b4005",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:54bfbeaea2e943b0d066d9e0686097980d1ad86dd2c1dd4784c87cd79f4a6055"
+      }
+    },
+    {
+      "scenario": "handler_crash",
+      "receipt": "results/queue-elixir-handler_crash/result.json",
+      "validity": "valid_development",
+      "verdict": {
+        "success": true,
+        "publication_missing": [],
+        "accepted": 96,
+        "correct_effects": 96,
+        "missing_effects": [],
+        "missing_poison": [],
+        "incorrect_effects": [],
+        "incorrect_deadletters": [],
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 8,
+        "http_concurrency_verified": null,
+        "drained": true,
+        "http_attempts": 97,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+      },
+      "images": {
+        "worker": "sha256:17d943355aaa4c24dbd7f9c9784f38cc25c43c52572d8e27a0a54ef9129b4005",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:54bfbeaea2e943b0d066d9e0686097980d1ad86dd2c1dd4784c87cd79f4a6055"
+      },
+      "handler_exception": {
+        "container_unchanged": true,
+        "hook_execution_supported_by_review_and_trace": true,
+        "healthy_other_tenant_effects_after_fault": 64
+      }
+    }
+  ],
+  "starter_clean": {
+    "receipt": "results/queue-elixir-starter-clean/result.json",
+    "validity": "valid_development",
+    "verdict": {
+      "success": true,
+      "publication_missing": [],
+      "accepted": 96,
+      "correct_effects": 96,
+      "missing_effects": [],
+      "missing_poison": [],
+      "incorrect_effects": [],
+      "incorrect_deadletters": [],
+      "wrong_attempts": 0,
+      "peak_observed_sink_handlers": 1,
+      "http_concurrency_verified": true,
+      "drained": true,
+      "http_attempts": 96,
+      "deadletter_copies": 0,
+      "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+    },
+    "images": {
+      "worker": "sha256:6989da23ee8b76b8de087a7ded2e8da7b07b3204802fb6d918207ac2f8ac3b50",
+      "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+      "infra": "sha256:54bfbeaea2e943b0d066d9e0686097980d1ad86dd2c1dd4784c87cd79f4a6055"
+    }
+  },
+  "limitations": [
+    "96-event development qualification only; no sustainable capacity or ecosystem ranking.",
+    "Handler hook raises a recoverable work-item exception, not an uncatchable worker/thread termination.",
+    "Native references are not evidence of model coding effort.",
+    "Original evaluator counter-race receipts and Elixir CA packaging failure remain preserved in results/."
+  ],
+  "controlled_coding_trial": false,
+  "artifact_provenance": "Reference authored during benchmark development with coding-agent assistance; not a blinded or budget-matched participant attempt."
+}

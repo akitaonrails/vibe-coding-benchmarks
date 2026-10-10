@@ -1,0 +1,7 @@
+source 'https://rubygems.org'
+gem 'bunny', '2.24.0'
+gem 'net-http', '0.9.1'
+gem 'logger', '1.7.0'
+gem 'json', '3.0.2'
+gem 'timeout', '0.6.1'
+gem 'net-protocol', '0.4.0'

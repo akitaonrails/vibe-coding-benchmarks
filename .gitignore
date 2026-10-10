@@ -5,3 +5,8 @@ __pycache__/
 results/
 .work/
 **/target/
+# Native queue-worker dependency/build trees
+scalability/workers/**/_build/
+scalability/workers/**/deps/
+scalability/workers/**/vendor/
+scalability/workers/**/.bundle/
