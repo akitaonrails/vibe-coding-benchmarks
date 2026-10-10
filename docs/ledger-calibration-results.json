@@ -1,0 +1,1001 @@
+{
+  "date": "2026-10-10",
+  "purpose": "difficulty_calibration_only",
+  "model_budget_seconds": 900,
+  "continuation_budget_seconds_each": 180,
+  "semantic_seed": 20261010,
+  "replicate": 2,
+  "cells": [
+    {
+      "treatment": {
+        "task": "ledger_engine",
+        "language": "ruby",
+        "model": "gpt-6-astra",
+        "effort": "low",
+        "tests": "T1"
+      },
+      "requested_runs": 1,
+      "validity_counts": {
+        "valid_smoke": 1
+      },
+      "checkpoints": [
+        {
+          "checkpoint": "unattended",
+          "reached": 1,
+          "graded": 1,
+          "successes": 1,
+          "ungraded_or_invalid_reached": 0,
+          "infrastructure_invalid_grades": 0,
+          "status_counts": {
+            "handoff": 1
+          },
+          "incremental_active_seconds": 79.95819712197408,
+          "incremental_tool_calls": 5,
+          "incremental_tool_seconds": 1.1536071561276913,
+          "provider_reported_total_tokens": 96617,
+          "complete_provider_usage_count": 1,
+          "observed_partial_provider_tokens": 96617,
+          "success_rate_among_graded": 1.0
+        },
+        {
+          "checkpoint": "nudge_1",
+          "reached": 1,
+          "graded": 1,
+          "successes": 1,
+          "ungraded_or_invalid_reached": 0,
+          "infrastructure_invalid_grades": 0,
+          "status_counts": {
+            "handoff": 1
+          },
+          "incremental_active_seconds": 34.525555992964655,
+          "incremental_tool_calls": 2,
+          "incremental_tool_seconds": 1.0858318728860468,
+          "provider_reported_total_tokens": 73272,
+          "complete_provider_usage_count": 1,
+          "observed_partial_provider_tokens": 73272,
+          "success_rate_among_graded": 1.0
+        },
+        {
+          "checkpoint": "nudge_2",
+          "reached": 1,
+          "graded": 1,
+          "successes": 1,
+          "ungraded_or_invalid_reached": 0,
+          "infrastructure_invalid_grades": 0,
+          "status_counts": {
+            "handoff": 1
+          },
+          "incremental_active_seconds": 60.95149938296527,
+          "incremental_tool_calls": 2,
+          "incremental_tool_seconds": 0.8484857168514282,
+          "provider_reported_total_tokens": 90629,
+          "complete_provider_usage_count": 1,
+          "observed_partial_provider_tokens": 90629,
+          "success_rate_among_graded": 1.0
+        }
+      ],
+      "observed_active_seconds": 175.435252497904,
+      "tool_calls": 9,
+      "provider_reported_total_tokens": 260518,
+      "token_accounting": "Explicit per-response provider counts reconciled with thread totals; broader benchmark qualification unchanged",
+      "source_inventory": {
+        "schema_version": 1,
+        "task": "ledger_engine",
+        "language": "ruby",
+        "starter": {
+          "source_sha256": "012db81e73f532545db56e6eff2ade0657ed311b92b395af9f7bd87eefa25963",
+          "groups": {
+            "production": {
+              "files": 6,
+              "bytes": 10195,
+              "physical_lines": 319,
+              "nonblank_lines": 286,
+              "comment_only_lines_heuristic": 3
+            },
+            "tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "mixed_production_and_tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "noncode": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            }
+          },
+          "files": [
+            {
+              "path": "device.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 2904,
+              "physical_lines": 91,
+              "nonblank_lines": 83,
+              "comment_only_lines_heuristic": 2
+            },
+            {
+              "path": "domain.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 712,
+              "physical_lines": 24,
+              "nonblank_lines": 22,
+              "comment_only_lines_heuristic": 1
+            },
+            {
+              "path": "engine.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 4018,
+              "physical_lines": 116,
+              "nonblank_lines": 107,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "main.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 151,
+              "physical_lines": 6,
+              "nonblank_lines": 6,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "table.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 1047,
+              "physical_lines": 39,
+              "nonblank_lines": 32,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "transaction.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 1363,
+              "physical_lines": 43,
+              "nonblank_lines": 36,
+              "comment_only_lines_heuristic": 0
+            }
+          ],
+          "changed_lines_vs_starter": null
+        },
+        "reference": {
+          "source_sha256": "0609066728cff5aaa0de09cdd965745a22426eaacb6cdc14eee3c64ca811e27c",
+          "groups": {
+            "production": {
+              "files": 6,
+              "bytes": 12766,
+              "physical_lines": 375,
+              "nonblank_lines": 338,
+              "comment_only_lines_heuristic": 4
+            },
+            "tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "mixed_production_and_tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "noncode": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            }
+          },
+          "files": [
+            {
+              "path": "device.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 3525,
+              "physical_lines": 100,
+              "nonblank_lines": 92,
+              "comment_only_lines_heuristic": 2
+            },
+            {
+              "path": "domain.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 712,
+              "physical_lines": 24,
+              "nonblank_lines": 22,
+              "comment_only_lines_heuristic": 1
+            },
+            {
+              "path": "engine.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 4397,
+              "physical_lines": 125,
+              "nonblank_lines": 116,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "main.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 151,
+              "physical_lines": 6,
+              "nonblank_lines": 6,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "table.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 1932,
+              "physical_lines": 64,
+              "nonblank_lines": 54,
+              "comment_only_lines_heuristic": 1
+            },
+            {
+              "path": "transaction.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 2049,
+              "physical_lines": 56,
+              "nonblank_lines": 48,
+              "comment_only_lines_heuristic": 0
+            }
+          ],
+          "changed_lines_vs_starter": {
+            "added": 68,
+            "removed": 12,
+            "total": 80
+          }
+        },
+        "definitions": {
+          "physical": "splitlines(), including blanks and comments; final newline adds no extra line.",
+          "tests": "Path/filename heuristic; Rust files with cfg(test)/test attributes are reported as mixed production+tests, not split into exact test LOC.",
+          "comments": "Full-line language-prefix heuristic; not a parser, may misclassify multiline strings.",
+          "change": "Difflib added+removed lines against same-language starter; unchanged scaffold is not attributed to the agent.",
+          "limits": "LOC is not semantic complexity, difficulty, quality, or a cross-language productivity ranking."
+        },
+        "initial_handoff": {
+          "index": 0,
+          "status": "handoff",
+          "source_sha256": "30a964c8a884bd3cf0f654c2374aafe328af2c4933472ccaf2a6cbb9d0653774",
+          "groups": {
+            "production": {
+              "files": 6,
+              "bytes": 12841,
+              "physical_lines": 382,
+              "nonblank_lines": 344,
+              "comment_only_lines_heuristic": 3
+            },
+            "tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "mixed_production_and_tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "noncode": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            }
+          },
+          "files": [
+            {
+              "path": "device.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 3505,
+              "physical_lines": 104,
+              "nonblank_lines": 95,
+              "comment_only_lines_heuristic": 2
+            },
+            {
+              "path": "domain.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 712,
+              "physical_lines": 24,
+              "nonblank_lines": 22,
+              "comment_only_lines_heuristic": 1
+            },
+            {
+              "path": "engine.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 4642,
+              "physical_lines": 130,
+              "nonblank_lines": 121,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "main.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 151,
+              "physical_lines": 6,
+              "nonblank_lines": 6,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "table.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 1797,
+              "physical_lines": 59,
+              "nonblank_lines": 49,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "transaction.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 2034,
+              "physical_lines": 59,
+              "nonblank_lines": 51,
+              "comment_only_lines_heuristic": 0
+            }
+          ],
+          "changed_lines_vs_starter": {
+            "added": 72,
+            "removed": 9,
+            "total": 81
+          }
+        },
+        "final_handoff": {
+          "index": 2,
+          "status": "handoff",
+          "source_sha256": "30a964c8a884bd3cf0f654c2374aafe328af2c4933472ccaf2a6cbb9d0653774",
+          "groups": {
+            "production": {
+              "files": 6,
+              "bytes": 12841,
+              "physical_lines": 382,
+              "nonblank_lines": 344,
+              "comment_only_lines_heuristic": 3
+            },
+            "tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "mixed_production_and_tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "noncode": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            }
+          },
+          "files": [
+            {
+              "path": "device.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 3505,
+              "physical_lines": 104,
+              "nonblank_lines": 95,
+              "comment_only_lines_heuristic": 2
+            },
+            {
+              "path": "domain.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 712,
+              "physical_lines": 24,
+              "nonblank_lines": 22,
+              "comment_only_lines_heuristic": 1
+            },
+            {
+              "path": "engine.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 4642,
+              "physical_lines": 130,
+              "nonblank_lines": 121,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "main.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 151,
+              "physical_lines": 6,
+              "nonblank_lines": 6,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "table.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 1797,
+              "physical_lines": 59,
+              "nonblank_lines": 49,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "transaction.rb",
+              "category": "production",
+              "files": 1,
+              "bytes": 2034,
+              "physical_lines": 59,
+              "nonblank_lines": 51,
+              "comment_only_lines_heuristic": 0
+            }
+          ],
+          "changed_lines_vs_starter": {
+            "added": 72,
+            "removed": 9,
+            "total": 81
+          }
+        },
+        "tests_condition": "T1",
+        "supplied_tests": "T1 supplies public_cases.json and test_public.py outside src; these are support artifacts, excluded from source LOC."
+      },
+      "rejected_tool_calls": [
+        1,
+        0,
+        0
+      ],
+      "private_cases_per_checkpoint": [
+        43,
+        43,
+        43
+      ]
+    },
+    {
+      "treatment": {
+        "task": "ledger_engine",
+        "language": "rust",
+        "model": "gpt-6-astra",
+        "effort": "low",
+        "tests": "T1"
+      },
+      "requested_runs": 1,
+      "validity_counts": {
+        "valid_smoke": 1
+      },
+      "checkpoints": [
+        {
+          "checkpoint": "unattended",
+          "reached": 1,
+          "graded": 1,
+          "successes": 1,
+          "ungraded_or_invalid_reached": 0,
+          "infrastructure_invalid_grades": 0,
+          "status_counts": {
+            "handoff": 1
+          },
+          "incremental_active_seconds": 79.73465269687586,
+          "incremental_tool_calls": 6,
+          "incremental_tool_seconds": 2.427991318050772,
+          "provider_reported_total_tokens": 127853,
+          "complete_provider_usage_count": 1,
+          "observed_partial_provider_tokens": 127853,
+          "success_rate_among_graded": 1.0
+        },
+        {
+          "checkpoint": "nudge_1",
+          "reached": 1,
+          "graded": 1,
+          "successes": 1,
+          "ungraded_or_invalid_reached": 0,
+          "infrastructure_invalid_grades": 0,
+          "status_counts": {
+            "handoff": 1
+          },
+          "incremental_active_seconds": 33.199557012179866,
+          "incremental_tool_calls": 2,
+          "incremental_tool_seconds": 0.8501443858258426,
+          "provider_reported_total_tokens": 82450,
+          "complete_provider_usage_count": 1,
+          "observed_partial_provider_tokens": 82450,
+          "success_rate_among_graded": 1.0
+        },
+        {
+          "checkpoint": "nudge_2",
+          "reached": 1,
+          "graded": 1,
+          "successes": 1,
+          "ungraded_or_invalid_reached": 0,
+          "infrastructure_invalid_grades": 0,
+          "status_counts": {
+            "handoff": 1
+          },
+          "incremental_active_seconds": 32.66398592898622,
+          "incremental_tool_calls": 2,
+          "incremental_tool_seconds": 0.47516101505607367,
+          "provider_reported_total_tokens": 94814,
+          "complete_provider_usage_count": 1,
+          "observed_partial_provider_tokens": 94814,
+          "success_rate_among_graded": 1.0
+        }
+      ],
+      "observed_active_seconds": 145.59819563804194,
+      "tool_calls": 10,
+      "provider_reported_total_tokens": 305117,
+      "token_accounting": "Explicit per-response provider counts reconciled with thread totals; broader benchmark qualification unchanged",
+      "source_inventory": {
+        "schema_version": 1,
+        "task": "ledger_engine",
+        "language": "rust",
+        "starter": {
+          "source_sha256": "6ba85ac9e94b4848f4d155789eb3e09bb4552b171c132314270bdfff5f747440",
+          "groups": {
+            "production": {
+              "files": 6,
+              "bytes": 18416,
+              "physical_lines": 576,
+              "nonblank_lines": 565,
+              "comment_only_lines_heuristic": 0
+            },
+            "tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "mixed_production_and_tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "noncode": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            }
+          },
+          "files": [
+            {
+              "path": "device.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 5315,
+              "physical_lines": 175,
+              "nonblank_lines": 173,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "domain.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 4800,
+              "physical_lines": 162,
+              "nonblank_lines": 159,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "index.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 235,
+              "physical_lines": 9,
+              "nonblank_lines": 8,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "main.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 588,
+              "physical_lines": 20,
+              "nonblank_lines": 18,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "solution.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 5843,
+              "physical_lines": 155,
+              "nonblank_lines": 153,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "transaction.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 1635,
+              "physical_lines": 55,
+              "nonblank_lines": 54,
+              "comment_only_lines_heuristic": 0
+            }
+          ],
+          "changed_lines_vs_starter": null
+        },
+        "reference": {
+          "source_sha256": "7edfd48aaac36ba6673c176387e57241c1be3161d95378f534ab05f6bcc9341a",
+          "groups": {
+            "production": {
+              "files": 6,
+              "bytes": 22595,
+              "physical_lines": 701,
+              "nonblank_lines": 688,
+              "comment_only_lines_heuristic": 1
+            },
+            "tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "mixed_production_and_tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "noncode": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            }
+          },
+          "files": [
+            {
+              "path": "device.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 6017,
+              "physical_lines": 201,
+              "nonblank_lines": 198,
+              "comment_only_lines_heuristic": 1
+            },
+            {
+              "path": "domain.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 4972,
+              "physical_lines": 167,
+              "nonblank_lines": 164,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "index.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 820,
+              "physical_lines": 29,
+              "nonblank_lines": 26,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "main.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 588,
+              "physical_lines": 20,
+              "nonblank_lines": 18,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "solution.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 6571,
+              "physical_lines": 176,
+              "nonblank_lines": 175,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "transaction.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 3627,
+              "physical_lines": 108,
+              "nonblank_lines": 107,
+              "comment_only_lines_heuristic": 0
+            }
+          ],
+          "changed_lines_vs_starter": {
+            "added": 148,
+            "removed": 23,
+            "total": 171
+          }
+        },
+        "definitions": {
+          "physical": "splitlines(), including blanks and comments; final newline adds no extra line.",
+          "tests": "Path/filename heuristic; Rust files with cfg(test)/test attributes are reported as mixed production+tests, not split into exact test LOC.",
+          "comments": "Full-line language-prefix heuristic; not a parser, may misclassify multiline strings.",
+          "change": "Difflib added+removed lines against same-language starter; unchanged scaffold is not attributed to the agent.",
+          "limits": "LOC is not semantic complexity, difficulty, quality, or a cross-language productivity ranking."
+        },
+        "initial_handoff": {
+          "index": 0,
+          "status": "handoff",
+          "source_sha256": "f94ce80b83ac0738bdfd3212550d2e02baebf862f61f04b06698df0ad03d1c62",
+          "groups": {
+            "production": {
+              "files": 6,
+              "bytes": 21797,
+              "physical_lines": 668,
+              "nonblank_lines": 657,
+              "comment_only_lines_heuristic": 1
+            },
+            "tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "mixed_production_and_tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "noncode": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            }
+          },
+          "files": [
+            {
+              "path": "device.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 5641,
+              "physical_lines": 184,
+              "nonblank_lines": 182,
+              "comment_only_lines_heuristic": 1
+            },
+            {
+              "path": "domain.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 4800,
+              "physical_lines": 162,
+              "nonblank_lines": 159,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "index.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 235,
+              "physical_lines": 9,
+              "nonblank_lines": 8,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "main.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 588,
+              "physical_lines": 20,
+              "nonblank_lines": 18,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "solution.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 6625,
+              "physical_lines": 178,
+              "nonblank_lines": 176,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "transaction.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 3908,
+              "physical_lines": 115,
+              "nonblank_lines": 114,
+              "comment_only_lines_heuristic": 0
+            }
+          ],
+          "changed_lines_vs_starter": {
+            "added": 104,
+            "removed": 12,
+            "total": 116
+          }
+        },
+        "final_handoff": {
+          "index": 2,
+          "status": "handoff",
+          "source_sha256": "0a1b4768ff17aa30c5d66350ec426cdf0abf4781ad691c2d5c9117828e5d47ab",
+          "groups": {
+            "production": {
+              "files": 5,
+              "bytes": 15172,
+              "physical_lines": 490,
+              "nonblank_lines": 481,
+              "comment_only_lines_heuristic": 1
+            },
+            "tests": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            },
+            "mixed_production_and_tests": {
+              "files": 1,
+              "bytes": 11938,
+              "physical_lines": 331,
+              "nonblank_lines": 324,
+              "comment_only_lines_heuristic": 0
+            },
+            "noncode": {
+              "files": 0,
+              "bytes": 0,
+              "physical_lines": 0,
+              "nonblank_lines": 0,
+              "comment_only_lines_heuristic": 0
+            }
+          },
+          "files": [
+            {
+              "path": "device.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 5641,
+              "physical_lines": 184,
+              "nonblank_lines": 182,
+              "comment_only_lines_heuristic": 1
+            },
+            {
+              "path": "domain.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 4800,
+              "physical_lines": 162,
+              "nonblank_lines": 159,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "index.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 235,
+              "physical_lines": 9,
+              "nonblank_lines": 8,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "main.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 588,
+              "physical_lines": 20,
+              "nonblank_lines": 18,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "solution.rs",
+              "category": "mixed_production_and_tests",
+              "files": 1,
+              "bytes": 11938,
+              "physical_lines": 331,
+              "nonblank_lines": 324,
+              "comment_only_lines_heuristic": 0
+            },
+            {
+              "path": "transaction.rs",
+              "category": "production",
+              "files": 1,
+              "bytes": 3908,
+              "physical_lines": 115,
+              "nonblank_lines": 114,
+              "comment_only_lines_heuristic": 0
+            }
+          ],
+          "changed_lines_vs_starter": {
+            "added": 257,
+            "removed": 12,
+            "total": 269
+          }
+        },
+        "tests_condition": "T1",
+        "supplied_tests": "T1 supplies public_cases.json and test_public.py outside src; these are support artifacts, excluded from source LOC."
+      },
+      "rejected_tool_calls": [
+        1,
+        0,
+        0
+      ],
+      "private_cases_per_checkpoint": [
+        43,
+        43,
+        43
+      ]
+    }
+  ],
+  "difficulty_gate": {
+    "schema_version": 1,
+    "valid_initial_outcomes": 2,
+    "initial_successes": 2,
+    "first_handoff_ceiling_observed": false,
+    "excluded": {},
+    "reviewed_independent_instances": 0,
+    "difficulty_gate_passed": false,
+    "frontier_eligible": false,
+    "comparison_eligible": false,
+    "reasons": [
+      "need_at_least_three_reviewed_independent_instances_with_two_replicates_each",
+      "need_prespecified_strong_model_budget_and_mixed_pooled_outcomes"
+    ],
+    "policy": {
+      "minimum_independent_instances": 3,
+      "minimum_replicates_per_instance": 2,
+      "minimum_pooled_strong_observations": 12,
+      "minimum_initial_seconds": 900,
+      "size_threshold": null,
+      "equal_language_success_rates_required": false
+    },
+    "limitations": [
+      "Necessary development-screening gate, not a power calculation or proof of frontier difficulty.",
+      "Generated seeds of one workload do not establish independent semantic instances.",
+      "Difficulty selection pools languages and never requires similar Ruby/Rust success rates."
+    ]
+  },
+  "preceding_invalid_attempt": {
+    "language": "ruby",
+    "replicate": 1,
+    "active_seconds": 27.301204370101914,
+    "classification": "adapter_protocol_interruption",
+    "reason": "Timeout argument 200 exceeded tool schema maximum120; old adapter aborted instead of returning correction feedback.",
+    "excluded_from_language_correctness": true,
+    "receipt_preserved_locally": "results/ledger-calibration-ruby-t1/result.json"
+  },
+  "limitations": [
+    "Development smoke observations are not a powered language comparison.",
+    "Unreached nudges and missing grades are shown separately, never imputed successes or failures.",
+    "Provider counts are trace-reconciled consumption telemetry, not subscription billing or a normalized token efficiency ranking.",
+    "Only one semantic instance and one valid attempt per language; both T1.",
+    "Queue builds and validation were paused during both valid collections.",
+    "No independent confirmation that this task is frontier-hard; both initial artifacts passed."
+  ]
+}

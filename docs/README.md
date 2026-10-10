@@ -7,6 +7,7 @@ The question is whether stronger static guarantees improve **verified correctnes
 Start with [the implementation and validation status](implementation.md) for what runs now. [The experimental design](benchmark-design.md) and [the difficult task catalog](task-catalog.md) describe the broader research proposal. Supporting documents:
 
 - [Research findings and sources](research-findings.md): what existing evidence establishes, and where this experiment adds something.
+- [Larger ledger calibration results](ledger-calibration.md): both initial solutions passed; difficulty remains unqualified.
 - [Measurement and analysis](measurement-and-analysis.md): tokens, time, errors, nudges, uncertainty and decision rules.
 - [Codex harness plan](codex-harness-plan.md): subscription execution, isolation, telemetry and lessons from the reference project.
 - [Rollout plan](rollout-plan.md): a small qualification phase, staged pilot, expansion arithmetic and acceptance gates.
