@@ -32,6 +32,46 @@ python3 -m langbench selftest
 
 A starter intentionally does not implement all requested behavior, so its grade should fail. `selftest` grades the known-good references; it measures the grader/environment, not model capability. Real candidate execution must use the isolated backend. Results directories and scratch work are ignored by Git.
 
+## Live subscription smoke tests
+
+The implemented adapter pins Codex app-server 0.156.0 and records hashes of both
+its binary and Code Mode companion. It requires an existing ChatGPT subscription
+sign-in, exact requested model/effort availability, and a passing capability probe.
+Candidate shell commands run offline in Docker; private grading follows model and
+worker shutdown. See [implementation evidence and limitations](docs/implementation.md).
+
+```sh
+python3 -m langbench qualify results/qualification --model gpt-6-astra --effort low
+python3 -m langbench run protocol_migration ruby results/ruby-t1 --tests T1 --model gpt-6-astra --effort low --base-seconds 180 --continuation-seconds 60
+python3 -m langbench report results/ruby-t1/result.json
+```
+
+`qualify` and `run` accept `--binary /path/to/codex`; its matching
+`codex-code-mode-host` must be alongside it. These commands consume subscription
+inference. All four bounded Ruby/Rust × T0/T1 smoke cells passed the 44-case F4 grading
+suite at their initial checkpoint and after both nudges; the suite includes 20
+public and 24 withheld cases. This is development qualification, not evidence for
+a language ranking. The 48-cell pilot is not launched. Its three-minute initial budget is a toolchain
+smoke budget, not the pilot's proposed 45 minutes. Two fixed generic nudges get
+separate snapshots. Request-level provider counts reconcile for these pinned traces (cached input
+included; not billing or invisible compute). Generic token accounting remains
+unqualified, and a worker timeout that
+loses its artifact is infrastructure-invalid rather than a measured task failure.
+
+Execute a bounded prefix of a generated development plan:
+
+```sh
+mkdir -p .work
+mkdir -p .work
+python3 -m langbench plan > .work/pilot-plan.json
+python3 -m langbench batch .work/pilot-plan.json results/pilot --limit 2
+```
+
+The prefix follows randomized plan order and need not contain paired cells. The
+runner validates and freezes the selected plan, records durable progress, and
+stops on infrastructure/quota incidents without retries. No batch or full pilot
+has been launched. See the implementation document before selecting larger runs.
+
 ## Contents
 
 - `langbench/`: bundle preparation, process supervision, grading, manifests, event accounting, fixed-nudge collection and descriptive reports.

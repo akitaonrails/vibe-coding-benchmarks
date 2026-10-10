@@ -7,7 +7,7 @@ from .core import TASKS, IMPLEMENTED
 
 FIELDS = {'schema_version','attempt_id','task','language','tests','model','effort','replicate','block_id',
           'base_seconds','continuation_seconds','max_nudges','auth_mode','initial_artifact_sha256',
-          'environment_digest','usage_qualified','resolved_model'}
+          'environment_digest','usage_qualified','resolved_model','semantic_seed'}
 
 def validate(manifest):
     if not isinstance(manifest, dict) or set(manifest) != FIELDS:
@@ -19,6 +19,8 @@ def validate(manifest):
             raise ValueError(f'invalid {field}')
     if manifest['task'] not in TASKS or manifest['language'] not in IMPLEMENTED or manifest['tests'] not in ('T0','T1'):
         raise ValueError('invalid treatment')
+    if type(manifest['semantic_seed']) is not int or manifest['semantic_seed'] < 0:
+        raise ValueError('invalid semantic_seed')
     if manifest['effort'] not in ('low','medium','high') or manifest['auth_mode'] != 'chatgpt':
         raise ValueError('invalid model effort/auth mode')
     for field in ('replicate','base_seconds','continuation_seconds'):

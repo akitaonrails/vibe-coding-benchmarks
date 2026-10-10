@@ -1,0 +1,557 @@
+{
+  "schema_version": 1,
+  "kind": "development_smoke_summary",
+  "scored_benchmark_qualified": false,
+  "task": "protocol_migration",
+  "grading_suite": {
+    "total_cases": 44,
+    "public_cases": 20,
+    "withheld_seeded_cases": 24
+  },
+  "qualification_inference_included": false,
+  "attempts": [
+    {
+      "task": "protocol_migration",
+      "language": "ruby",
+      "tests": "T1",
+      "model": "gpt-6-astra",
+      "effort": "low",
+      "replicate": 1,
+      "block_id": "smoke-migration-1",
+      "semantic_seed": 20261010,
+      "base_seconds": 180,
+      "continuation_seconds": 60,
+      "max_nudges": 2,
+      "initial_artifact_sha256": "cd637d2c60da7bd10742aa6729213c844e795651d89b69a8cdc9ed5aa62ca4da",
+      "environment_digest": "31c2dc4250ffc2d492dfd869e6062037d1169465b4f3a0b2bd38a87ca3f902cc",
+      "validity": "valid_smoke",
+      "manifest_sha256": "ac7bb0402bc7b973d7a9e3de28d682b3e0be6dca598dd27fc3d791d4e70f95f0",
+      "local_receipt_path": "results/smoke-ruby-t1/result.json",
+      "local_event_ledger_path": "results/smoke-ruby-t1/collection/events.jsonl",
+      "provider_usage": {
+        "parser_version": "appserver-response-v1",
+        "response_count": 13,
+        "provider_reported_total_tokens": 205305,
+        "observed_components": {
+          "totalTokens": 205305,
+          "inputTokens": 201010,
+          "cachedInputTokens": 159232,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 4295,
+          "reasoningOutputTokens": 174
+        },
+        "complete": true,
+        "warnings": []
+      },
+      "checkpoints": [
+        {
+          "index": 0,
+          "phase": "unattended",
+          "status": "handoff",
+          "passed_cases": 44,
+          "total_cases": 44,
+          "success": true,
+          "critical_failures": [],
+          "seconds": 42.354136194102466,
+          "tool_calls": 4,
+          "tool_seconds": 0.8972013769671321,
+          "snapshot_sha256": "407a4e338f36285ce3de42024bdc1c52714a9ec8026368acd0016319c351c6e9",
+          "source_sha256": "b5929166d4d5a80950ec55d174d886999f77a6400a52c5ed8975142f555f074a",
+          "unchanged_from_initial": true,
+          "unchanged_from_previous": null,
+          "local_snapshot_path": "results/smoke-ruby-t1/collection/snapshot-0",
+          "provider_usage": {
+            "response_count": 5,
+            "provider_reported_total_tokens": 58804,
+            "observed_components": {
+              "totalTokens": 58804,
+              "inputTokens": 57098,
+              "cachedInputTokens": 30336,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 1706,
+              "reasoningOutputTokens": 60
+            },
+            "cumulative_reconciled": true,
+            "complete": true,
+            "warnings": []
+          }
+        },
+        {
+          "index": 1,
+          "phase": "nudge_1",
+          "status": "handoff",
+          "passed_cases": 44,
+          "total_cases": 44,
+          "success": true,
+          "critical_failures": [],
+          "seconds": 25.561566659016535,
+          "tool_calls": 2,
+          "tool_seconds": 0.8438283246941864,
+          "snapshot_sha256": "407a4e338f36285ce3de42024bdc1c52714a9ec8026368acd0016319c351c6e9",
+          "source_sha256": "b5929166d4d5a80950ec55d174d886999f77a6400a52c5ed8975142f555f074a",
+          "unchanged_from_initial": true,
+          "unchanged_from_previous": true,
+          "local_snapshot_path": "results/smoke-ruby-t1/collection/snapshot-1",
+          "provider_usage": {
+            "response_count": 3,
+            "provider_reported_total_tokens": 47144,
+            "observed_components": {
+              "totalTokens": 47144,
+              "inputTokens": 46223,
+              "cachedInputTokens": 42368,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 921,
+              "reasoningOutputTokens": 19
+            },
+            "cumulative_reconciled": true,
+            "complete": true,
+            "warnings": []
+          }
+        },
+        {
+          "index": 2,
+          "phase": "nudge_2",
+          "status": "handoff",
+          "passed_cases": 44,
+          "total_cases": 44,
+          "success": true,
+          "critical_failures": [],
+          "seconds": 41.56404322292656,
+          "tool_calls": 4,
+          "tool_seconds": 1.0876645890530199,
+          "snapshot_sha256": "407a4e338f36285ce3de42024bdc1c52714a9ec8026368acd0016319c351c6e9",
+          "source_sha256": "b5929166d4d5a80950ec55d174d886999f77a6400a52c5ed8975142f555f074a",
+          "unchanged_from_initial": true,
+          "unchanged_from_previous": true,
+          "local_snapshot_path": "results/smoke-ruby-t1/collection/snapshot-2",
+          "provider_usage": {
+            "response_count": 5,
+            "provider_reported_total_tokens": 99357,
+            "observed_components": {
+              "totalTokens": 99357,
+              "inputTokens": 97689,
+              "cachedInputTokens": 86528,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 1668,
+              "reasoningOutputTokens": 95
+            },
+            "cumulative_reconciled": true,
+            "complete": true,
+            "warnings": []
+          }
+        }
+      ],
+      "nudge_active_seconds": 67.12560988194309,
+      "nudge_tool_calls": 6
+    },
+    {
+      "task": "protocol_migration",
+      "language": "rust",
+      "tests": "T1",
+      "model": "gpt-6-astra",
+      "effort": "low",
+      "replicate": 1,
+      "block_id": "smoke-migration-1",
+      "semantic_seed": 20261010,
+      "base_seconds": 180,
+      "continuation_seconds": 60,
+      "max_nudges": 2,
+      "initial_artifact_sha256": "33936163ac6ccef1e473c86b49bee7441f135df30f7462ca8f025f1567459956",
+      "environment_digest": "31c2dc4250ffc2d492dfd869e6062037d1169465b4f3a0b2bd38a87ca3f902cc",
+      "validity": "valid_smoke",
+      "manifest_sha256": "9168ef14daf8a2684557a3b6e7eceb93b74c39683d827b8180ded7e9ced0d3c7",
+      "local_receipt_path": "results/smoke-rust-t1/result.json",
+      "local_event_ledger_path": "results/smoke-rust-t1/collection/events.jsonl",
+      "provider_usage": {
+        "parser_version": "appserver-response-v1",
+        "response_count": 11,
+        "provider_reported_total_tokens": 181068,
+        "observed_components": {
+          "totalTokens": 181068,
+          "inputTokens": 176777,
+          "cachedInputTokens": 132224,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 4291,
+          "reasoningOutputTokens": 53
+        },
+        "complete": true,
+        "warnings": []
+      },
+      "checkpoints": [
+        {
+          "index": 0,
+          "phase": "unattended",
+          "status": "handoff",
+          "passed_cases": 44,
+          "total_cases": 44,
+          "success": true,
+          "critical_failures": [],
+          "seconds": 46.23855640483089,
+          "tool_calls": 4,
+          "tool_seconds": 1.6883757908362895,
+          "snapshot_sha256": "e21f121ebe21053e727befd56deeece6fbf444db3ddf465920b2aa48ebd25e74",
+          "source_sha256": "fc92d46075195d1ca12c4a62c56c780d4515019197410a2481935793d8d9de6d",
+          "unchanged_from_initial": true,
+          "unchanged_from_previous": null,
+          "local_snapshot_path": "results/smoke-rust-t1/collection/snapshot-0",
+          "provider_usage": {
+            "response_count": 5,
+            "provider_reported_total_tokens": 61148,
+            "observed_components": {
+              "totalTokens": 61148,
+              "inputTokens": 59082,
+              "cachedInputTokens": 44288,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 2066,
+              "reasoningOutputTokens": 19
+            },
+            "cumulative_reconciled": true,
+            "complete": true,
+            "warnings": []
+          }
+        },
+        {
+          "index": 1,
+          "phase": "nudge_1",
+          "status": "handoff",
+          "passed_cases": 44,
+          "total_cases": 44,
+          "success": true,
+          "critical_failures": [],
+          "seconds": 23.884239710168913,
+          "tool_calls": 2,
+          "tool_seconds": 0.1822040881961584,
+          "snapshot_sha256": "e21f121ebe21053e727befd56deeece6fbf444db3ddf465920b2aa48ebd25e74",
+          "source_sha256": "fc92d46075195d1ca12c4a62c56c780d4515019197410a2481935793d8d9de6d",
+          "unchanged_from_initial": true,
+          "unchanged_from_previous": true,
+          "local_snapshot_path": "results/smoke-rust-t1/collection/snapshot-1",
+          "provider_usage": {
+            "response_count": 3,
+            "provider_reported_total_tokens": 53201,
+            "observed_components": {
+              "totalTokens": 53201,
+              "inputTokens": 52389,
+              "cachedInputTokens": 46592,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 812,
+              "reasoningOutputTokens": 13
+            },
+            "cumulative_reconciled": true,
+            "complete": true,
+            "warnings": []
+          }
+        },
+        {
+          "index": 2,
+          "phase": "nudge_2",
+          "status": "handoff",
+          "passed_cases": 44,
+          "total_cases": 44,
+          "success": true,
+          "critical_failures": [],
+          "seconds": 33.29470259905793,
+          "tool_calls": 2,
+          "tool_seconds": 0.2893097191117704,
+          "snapshot_sha256": "e21f121ebe21053e727befd56deeece6fbf444db3ddf465920b2aa48ebd25e74",
+          "source_sha256": "fc92d46075195d1ca12c4a62c56c780d4515019197410a2481935793d8d9de6d",
+          "unchanged_from_initial": true,
+          "unchanged_from_previous": true,
+          "local_snapshot_path": "results/smoke-rust-t1/collection/snapshot-2",
+          "provider_usage": {
+            "response_count": 3,
+            "provider_reported_total_tokens": 66719,
+            "observed_components": {
+              "totalTokens": 66719,
+              "inputTokens": 65306,
+              "cachedInputTokens": 41344,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 1413,
+              "reasoningOutputTokens": 21
+            },
+            "cumulative_reconciled": true,
+            "complete": true,
+            "warnings": []
+          }
+        }
+      ],
+      "nudge_active_seconds": 57.17894230922684,
+      "nudge_tool_calls": 4
+    },
+    {
+      "task": "protocol_migration",
+      "language": "ruby",
+      "tests": "T0",
+      "model": "gpt-6-astra",
+      "effort": "low",
+      "replicate": 1,
+      "block_id": "smoke-migration-1",
+      "semantic_seed": 20261010,
+      "base_seconds": 180,
+      "continuation_seconds": 60,
+      "max_nudges": 2,
+      "initial_artifact_sha256": "7b0ff4a9c1087fc3ce34c8148e05faa9b4653f6bcb8b5587609836ef3298a069",
+      "environment_digest": "31c2dc4250ffc2d492dfd869e6062037d1169465b4f3a0b2bd38a87ca3f902cc",
+      "validity": "valid_smoke",
+      "manifest_sha256": "c95132088ceabd0c059192bd35ab252af761ac023d3330c08d38274eee736e59",
+      "local_receipt_path": "results/smoke-ruby-t0/result.json",
+      "local_event_ledger_path": "results/smoke-ruby-t0/collection/events.jsonl",
+      "provider_usage": {
+        "parser_version": "appserver-response-v1",
+        "response_count": 11,
+        "provider_reported_total_tokens": 174494,
+        "observed_components": {
+          "totalTokens": 174494,
+          "inputTokens": 169621,
+          "cachedInputTokens": 152576,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 4873,
+          "reasoningOutputTokens": 68
+        },
+        "complete": true,
+        "warnings": []
+      },
+      "checkpoints": [
+        {
+          "index": 0,
+          "phase": "unattended",
+          "status": "handoff",
+          "passed_cases": 44,
+          "total_cases": 44,
+          "success": true,
+          "critical_failures": [],
+          "seconds": 56.92680296790786,
+          "tool_calls": 4,
+          "tool_seconds": 0.2598366749007255,
+          "snapshot_sha256": "cdc2673cbbff90cbaf156f3a107988b38c701355882633db1541116586f9bfce",
+          "source_sha256": "ea2cd028515e506259dd3d4863fdbf3f46d79d45b6e8be7555d8be703d889e90",
+          "unchanged_from_initial": true,
+          "unchanged_from_previous": null,
+          "local_snapshot_path": "results/smoke-ruby-t0/collection/snapshot-0",
+          "provider_usage": {
+            "response_count": 5,
+            "provider_reported_total_tokens": 59270,
+            "observed_components": {
+              "totalTokens": 59270,
+              "inputTokens": 56860,
+              "cachedInputTokens": 49408,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 2410,
+              "reasoningOutputTokens": 32
+            },
+            "cumulative_reconciled": true,
+            "complete": true,
+            "warnings": []
+          }
+        },
+        {
+          "index": 1,
+          "phase": "nudge_1",
+          "status": "handoff",
+          "passed_cases": 44,
+          "total_cases": 44,
+          "success": true,
+          "critical_failures": [],
+          "seconds": 26.658649445977062,
+          "tool_calls": 2,
+          "tool_seconds": 0.17895835172384977,
+          "snapshot_sha256": "cdc2673cbbff90cbaf156f3a107988b38c701355882633db1541116586f9bfce",
+          "source_sha256": "ea2cd028515e506259dd3d4863fdbf3f46d79d45b6e8be7555d8be703d889e90",
+          "unchanged_from_initial": true,
+          "unchanged_from_previous": true,
+          "local_snapshot_path": "results/smoke-ruby-t0/collection/snapshot-1",
+          "provider_usage": {
+            "response_count": 3,
+            "provider_reported_total_tokens": 51498,
+            "observed_components": {
+              "totalTokens": 51498,
+              "inputTokens": 50455,
+              "cachedInputTokens": 45056,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 1043,
+              "reasoningOutputTokens": 13
+            },
+            "cumulative_reconciled": true,
+            "complete": true,
+            "warnings": []
+          }
+        },
+        {
+          "index": 2,
+          "phase": "nudge_2",
+          "status": "handoff",
+          "passed_cases": 44,
+          "total_cases": 44,
+          "success": true,
+          "critical_failures": [],
+          "seconds": 32.65729995910078,
+          "tool_calls": 2,
+          "tool_seconds": 0.35345823783427477,
+          "snapshot_sha256": "cdc2673cbbff90cbaf156f3a107988b38c701355882633db1541116586f9bfce",
+          "source_sha256": "ea2cd028515e506259dd3d4863fdbf3f46d79d45b6e8be7555d8be703d889e90",
+          "unchanged_from_initial": true,
+          "unchanged_from_previous": true,
+          "local_snapshot_path": "results/smoke-ruby-t0/collection/snapshot-2",
+          "provider_usage": {
+            "response_count": 3,
+            "provider_reported_total_tokens": 63726,
+            "observed_components": {
+              "totalTokens": 63726,
+              "inputTokens": 62306,
+              "cachedInputTokens": 58112,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 1420,
+              "reasoningOutputTokens": 23
+            },
+            "cumulative_reconciled": true,
+            "complete": true,
+            "warnings": []
+          }
+        }
+      ],
+      "nudge_active_seconds": 59.315949405077845,
+      "nudge_tool_calls": 4
+    },
+    {
+      "task": "protocol_migration",
+      "language": "rust",
+      "tests": "T0",
+      "model": "gpt-6-astra",
+      "effort": "low",
+      "replicate": 1,
+      "block_id": "smoke-migration-1",
+      "semantic_seed": 20261010,
+      "base_seconds": 180,
+      "continuation_seconds": 60,
+      "max_nudges": 2,
+      "initial_artifact_sha256": "9336e7355adc05fb2e807e3e3817c9c50f5a9185a3787e4cf4b0ec4643561a0a",
+      "environment_digest": "31c2dc4250ffc2d492dfd869e6062037d1169465b4f3a0b2bd38a87ca3f902cc",
+      "validity": "valid_smoke",
+      "manifest_sha256": "d04762047727770f250a290f2fa4d06a68b15e089bea80657e13839d76e722c0",
+      "local_receipt_path": "results/smoke-rust-t0/result.json",
+      "local_event_ledger_path": "results/smoke-rust-t0/collection/events.jsonl",
+      "provider_usage": {
+        "parser_version": "appserver-response-v1",
+        "response_count": 12,
+        "provider_reported_total_tokens": 215814,
+        "observed_components": {
+          "totalTokens": 215814,
+          "inputTokens": 209765,
+          "cachedInputTokens": 188544,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 6049,
+          "reasoningOutputTokens": 120
+        },
+        "complete": true,
+        "warnings": []
+      },
+      "checkpoints": [
+        {
+          "index": 0,
+          "phase": "unattended",
+          "status": "handoff",
+          "passed_cases": 44,
+          "total_cases": 44,
+          "success": true,
+          "critical_failures": [],
+          "seconds": 65.91149225900881,
+          "tool_calls": 5,
+          "tool_seconds": 1.7681632111780345,
+          "snapshot_sha256": "bc829048f13326324d158b891f1b8ebb3ce21a8b6a0291eebce7ae25cfbe1202",
+          "source_sha256": "c7d27f3f084547e75ca9c0c8bacd4f5866f467890b08b1926b853ec31f81c411",
+          "unchanged_from_initial": true,
+          "unchanged_from_previous": null,
+          "local_snapshot_path": "results/smoke-rust-t0/collection/snapshot-0",
+          "provider_usage": {
+            "response_count": 6,
+            "provider_reported_total_tokens": 80803,
+            "observed_components": {
+              "totalTokens": 80803,
+              "inputTokens": 77968,
+              "cachedInputTokens": 67328,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 2835,
+              "reasoningOutputTokens": 35
+            },
+            "cumulative_reconciled": true,
+            "complete": true,
+            "warnings": []
+          }
+        },
+        {
+          "index": 1,
+          "phase": "nudge_1",
+          "status": "handoff",
+          "passed_cases": 44,
+          "total_cases": 44,
+          "success": true,
+          "critical_failures": [],
+          "seconds": 37.71377681102604,
+          "tool_calls": 2,
+          "tool_seconds": 0.36719021503813565,
+          "snapshot_sha256": "74d757857e3dc0a5bbd9f24212c3dfe09a8e0b10cfa34d0c8cf69ccf2048dec4",
+          "source_sha256": "6bbfaf70ad622268d6a16e1bf94964ef1be13391071412a5a451c3f7782bdc02",
+          "unchanged_from_initial": false,
+          "unchanged_from_previous": false,
+          "local_snapshot_path": "results/smoke-rust-t0/collection/snapshot-1",
+          "provider_usage": {
+            "response_count": 3,
+            "provider_reported_total_tokens": 60372,
+            "observed_components": {
+              "totalTokens": 60372,
+              "inputTokens": 58674,
+              "cachedInputTokens": 53376,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 1698,
+              "reasoningOutputTokens": 58
+            },
+            "cumulative_reconciled": true,
+            "complete": true,
+            "warnings": []
+          }
+        },
+        {
+          "index": 2,
+          "phase": "nudge_2",
+          "status": "handoff",
+          "passed_cases": 44,
+          "total_cases": 44,
+          "success": true,
+          "critical_failures": [],
+          "seconds": 38.59997754194774,
+          "tool_calls": 2,
+          "tool_seconds": 0.5095218589995056,
+          "snapshot_sha256": "74d757857e3dc0a5bbd9f24212c3dfe09a8e0b10cfa34d0c8cf69ccf2048dec4",
+          "source_sha256": "6bbfaf70ad622268d6a16e1bf94964ef1be13391071412a5a451c3f7782bdc02",
+          "unchanged_from_initial": false,
+          "unchanged_from_previous": true,
+          "local_snapshot_path": "results/smoke-rust-t0/collection/snapshot-2",
+          "provider_usage": {
+            "response_count": 3,
+            "provider_reported_total_tokens": 74639,
+            "observed_components": {
+              "totalTokens": 74639,
+              "inputTokens": 73123,
+              "cachedInputTokens": 67840,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 1516,
+              "reasoningOutputTokens": 27
+            },
+            "cumulative_reconciled": true,
+            "complete": true,
+            "warnings": []
+          }
+        }
+      ],
+      "nudge_active_seconds": 76.31375435297377,
+      "nudge_tool_calls": 4
+    }
+  ],
+  "limitations": [
+    "One attempt per cell; compact development task, not frontier calibrated.",
+    "Timing not controlled: concurrent harness validation overlapped part of Rust T1.",
+    "Provider-reported tokens include cached input; not billing or invisible compute.",
+    "All initial checkpoints passed; no evidence about nudge rescue probability.",
+    "No language or test-support causal conclusion."
+  ]
+}

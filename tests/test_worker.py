@@ -23,6 +23,7 @@ class DockerBoundaryTests(unittest.TestCase):
             source=self.workspace(temp)
             with DockerWorker(source) as worker:
                 self.assertEqual(worker.qualification['pids.max'],'64')
+                self.assertFalse(worker.qualification['controller_assets_visible'])
                 result=worker.execute("test ! -e /mnt/data/Projects/languages-benchmark && test ! -e /root/.codex && test ! -e /var/run/docker.sock && test ! -e /home/akitaonrails/.codex")
                 self.assertEqual(result['returncode'],0)
                 result=worker.execute("sh -c 'sleep 1; echo drift > /workspace/src/drift' >/dev/null 2>&1 &")
@@ -55,6 +56,7 @@ class PythonHelperIsolationTests(unittest.TestCase):
                 (source/(name+'.py')).write_text("open('/workspace/SHADOW_EXECUTED','w').write('bad')\nraise RuntimeError('candidate helper shadow executed')\n")
             with DockerWorker(source) as worker:
                 self.assertEqual(worker.qualification['pids.max'],'64')
+                self.assertFalse(worker.qualification['controller_assets_visible'])
                 result=worker.execute('true')
                 self.assertEqual(result['returncode'],0)
                 self.assertIsNone(result['termination'])
@@ -77,3 +79,20 @@ class WorkerReapingTests(unittest.TestCase):
                 result=worker.execute('true')
                 self.assertEqual(result['returncode'],0)
                 self.assertIsNone(result['termination'])
+
+class MountedOracleLeakageTests(unittest.TestCase):
+    def test_task_resource_root_under_runtime_mount_rejected(self):
+        from langbench.worker import reject_mounted_controller_assets
+        with patch('langbench.worker.task_path',return_value=Path('/usr/lib/python3/site-packages/langbench_tasks/task')):
+            with self.assertRaisesRegex(RuntimeError,'private task assets'):
+                reject_mounted_controller_assets([Path('/usr')])
+    def test_visible_python_package_fails_qualification_before_candidate_execution(self):
+        worker=object.__new__(DockerWorker)
+        worker.raw=lambda *args,**kwargs:{'returncode':0,'stdout':json.dumps({'controller_assets_visible':True})}
+        with self.assertRaisesRegex(RuntimeError,'package is visible'):
+            worker.qualify()
+    def test_missing_package_visibility_evidence_fails_closed(self):
+        worker=object.__new__(DockerWorker)
+        worker.raw=lambda *args,**kwargs:{'returncode':0,'stdout':'{}'}
+        with self.assertRaisesRegex(RuntimeError,'package is visible'):
+            worker.qualify()

@@ -99,7 +99,7 @@ class ManifestTests(unittest.TestCase):
         return {'schema_version':1,'attempt_id':'attempt-1','task':'crash_store','language':'ruby','tests':'T0',
                 'model':'gpt-6-astra','effort':'low','replicate':1,'block_id':'block-1','base_seconds':60,
                 'continuation_seconds':30,'max_nudges':2,'auth_mode':'chatgpt','initial_artifact_sha256':'a'*64,
-                'environment_digest':'unqualified','usage_qualified':False,'resolved_model':None}
+                'environment_digest':'unqualified','usage_qualified':False,'resolved_model':None,'semantic_seed':0}
     def test_freeze_and_detect_tamper(self):
         from langbench.manifest import freeze, load
         with tempfile.TemporaryDirectory() as tmp:

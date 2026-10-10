@@ -5,8 +5,14 @@ from pathlib import Path, PurePosixPath
 import shutil
 import tempfile
 import uuid
-from .core import copy_workspace, digest_tree
+from .core import copy_workspace, digest_tree, task_path, TASKS
 from .process import execute
+
+def reject_mounted_controller_assets(mounted_roots):
+    private_roots=[Path(__file__).resolve().parent, *(task_path(task).resolve() for task in TASKS)]
+    for private in private_roots:
+        if any(private.is_relative_to(Path(mount).resolve()) for mount in mounted_roots):
+            raise RuntimeError('controller or private task assets would be exposed through a runtime mount')
 
 class DockerWorker:
     def __init__(self, source, *, image='alpine:3.22'):
@@ -28,7 +34,9 @@ class DockerWorker:
               '--tmpfs','/tmp:rw,exec,nosuid,nodev,size=67108864', '--tmpfs','/cargo:rw,nosuid,nodev,size=134217728',
               '--workdir','/workspace','--env','HOME=/tmp','--env','CARGO_HOME=/cargo','--env','CARGO_NET_OFFLINE=true',
               '--env','LANG=C.UTF-8']
+        mounted_roots=[]
         for host, guest in [('/usr','/usr'),('/usr/bin','/bin'),('/usr/lib','/lib'),('/usr/lib','/lib64')]:
+            mounted_roots.append(Path(host).resolve())
             args += ['--mount',f'type=bind,src={host},dst={guest},readonly']
         for program in ('ruby','rustc'):
             binary=shutil.which(program)
@@ -43,11 +51,14 @@ class DockerWorker:
             else:
                 install=resolved.parent.parent
             if not str(install).startswith('/usr'):
+                mounted_roots.append(install)
                 args += ['--mount',f'type=bind,src={install},dst={install},readonly']
                 self.path.insert(0,str(install/'bin'))
         registry=Path.home()/'.cargo/registry'
         if registry.is_dir():
+            mounted_roots.append(registry.resolve())
             args += ['--mount',f'type=bind,src={registry},dst=/cargo/registry,readonly']
+        reject_mounted_controller_assets(mounted_roots)
         args += ['--env','PATH='+':'.join(self.path),'--entrypoint','/usr/bin/sleep',self.image,'infinity']
         started=execute(args,timeout=30)
         if started['returncode']:
@@ -120,10 +131,11 @@ for p in os.listdir('/proc'):
         return result
 
     def qualify(self):
-        script='''import json,pathlib,socket
+        script='''import json,pathlib,socket,importlib.util
 p=pathlib.Path('/sys/fs/cgroup')
 r={k:(p/k).read_text().strip() for k in ('memory.max','memory.swap.max','pids.max','cpu.max')}
 r['mounts']=pathlib.Path('/proc/mounts').read_text()
+r['controller_assets_visible']=any(importlib.util.find_spec(name) is not None for name in ('langbench','langbench_tasks'))
 s=socket.socket();s.settimeout(.1)
 try:s.connect(('1.1.1.1',53));r['network_blocked']=False
 except OSError:r['network_blocked']=True
@@ -133,6 +145,8 @@ print(json.dumps(r))'''
         if result['returncode']:
             raise RuntimeError('cannot inspect worker resource boundary')
         info=json.loads(result['stdout'])
+        if info.get('controller_assets_visible') is not False:
+            raise RuntimeError('controller or private task package is visible in the worker runtime')
         if info['memory.max']!='4294967296' or info['memory.swap.max']!='0' or info['pids.max']!='64' or info['cpu.max']!='200000 100000' or not info['network_blocked']:
             raise RuntimeError('worker resource/network limits did not match requested policy')
         mounts=info.pop('mounts')

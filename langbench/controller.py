@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 import shutil
 from .core import digest_tree, copy_workspace
-from .metrics import normalize_usage
+from .metrics import normalize_usage, reconcile_provider_usage
 
 NUDGES = (
     'Continue working on the original task. Review the requirements and complete any unfinished work using the tools available in this run.',
@@ -56,4 +56,5 @@ seconds, events. Adapter must return only after all candidate processes stop.
             break
     return {'invocations':invocations, 'nudges':len(invocations)-1,
             'active_seconds':sum(item['seconds'] for item in invocations),
-            'usage':normalize_usage([event for item in invocations for event in item['events']])}
+            'usage':normalize_usage([event for item in invocations for event in item['events']]),
+            'provider_usage':reconcile_provider_usage(invocations)}
