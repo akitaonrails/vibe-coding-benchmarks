@@ -1,6 +1,6 @@
 # Queue reliability, backpressure and engineering effort
 
-Status: design and implementation track, added 2026-10-10. No Elixir/Rust/Rails comparative results exist. This is separate from the language typing experiment. The treatment is a language/runtime/framework ecosystem, including its documentation and defaults; results cannot isolate static typing.
+Status: real runtime development suite implemented, added 2026-10-10. Native reference qualification and exploratory load receipts exist; no controlled coding-effort or qualified capacity comparison exists. See [implementation](scalability-implementation.md) and [sustained-load evidence](scalability-load-validation.md). This is separate from the language typing experiment. The treatment is a language/runtime/framework ecosystem, including its documentation and defaults; results cannot isolate static typing.
 
 ## Questions and falsifiable hypotheses
 

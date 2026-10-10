@@ -1,0 +1,51 @@
+{
+  "kind": "queue_exploratory_load_plan",
+  "frozen_before_results": true,
+  "purpose": "Validate sustained-load instrumentation and bounded-concurrency profiles, not rank stacks or measure maximum capacity.",
+  "scenario": "slow",
+  "count": 10000,
+  "rate": 200,
+  "payload_bytes": 4096,
+  "seed": 20261010,
+  "common_limits": {
+    "cpus": 2,
+    "memory_mb": 1024,
+    "pids": 2048,
+    "sink_memory_mb": 1024,
+    "deadline": 90,
+    "drain_seconds": 30
+  },
+  "profiles": [
+    {
+      "max_inflight": 8,
+      "prefetch": 32
+    },
+    {
+      "max_inflight": 64,
+      "prefetch": 256
+    }
+  ],
+  "execution_order": [
+    "elixir",
+    "rust",
+    "rails",
+    "ruby"
+  ],
+  "order_randomized": false,
+  "runtime_repeats": 1,
+  "controlled_coding_trials": false,
+  "stacks": {
+    "elixir": "langbench-queue-elixir:reference",
+    "rust": "langbench-queue-rust:reference",
+    "rails": "langbench-queue-rails:dev",
+    "ruby": "langbench-queue-ruby:dev"
+  },
+  "scalable_capacity_qualified": false,
+  "notes": [
+    "Profiles and sequence fixed in the batch command before the first result; serialized here during collection.",
+    "Run sequentially with benchmark builds/tests paused. This is a shared host, not proven contention-free.",
+    "Each receipt resolves stack and infrastructure tags to immutable image IDs.",
+    "The sink enforces a nominal 50ms processing delay, with additional measured service overhead.",
+    "No latency SLO or infrastructure headroom qualification; completion does not imply sustainable offered rate."
+  ]
+}

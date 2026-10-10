@@ -78,7 +78,8 @@ A separate real RabbitMQ experiment compares Elixir/OTP/Broadway, Rust/Tokio/Lap
 Rails/Bunny and a plain Ruby/Bunny control. It tests bounded concurrency, durable
 completion, lost responses, poison messages, process/broker recovery and shutdown.
 Read [the design](docs/scalability-benchmark.md) and
-[implementation status](docs/scalability-implementation.md). These reference
+[implementation status](docs/scalability-implementation.md), and
+[sustained workload evidence](docs/scalability-load-validation.md). These reference
 qualifications do not establish AI coding effort or sustainable capacity.
 
 ```sh

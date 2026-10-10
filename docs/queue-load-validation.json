@@ -1,0 +1,902 @@
+{
+  "kind": "queue_sustained_load_development_validation",
+  "plan": "configs/queue-load-development.json",
+  "controlled_coding_trial": false,
+  "scalable_capacity_qualified": false,
+  "date": "2026-10-10",
+  "host_architecture": "x86_64",
+  "trial_count": 8,
+  "trials": [
+    {
+      "stack": "elixir",
+      "concurrency": 8,
+      "receipt": "results/queue-load-elixir-c8/result.json",
+      "receipt_sha256": "f611336ded2dc424dac7adbbb8d13888a989049ddc48ee1218f478d81dd6a149",
+      "validity": "valid_development",
+      "images": {
+        "worker": "sha256:17d943355aaa4c24dbd7f9c9784f38cc25c43c52572d8e27a0a54ef9129b4005",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:ffc0d5fa786ede14e119b6f9d2393d53d7adb989a91ed54e4725573ba5458187"
+      },
+      "manifest_sha256": "e23c469b76c5d9341adee59695ff58e5e62ed051aca36cd7bb492c873038572c",
+      "requested_events": 10000,
+      "seed": 20261010,
+      "offered_rate": 200.0,
+      "payload_bytes": 4096,
+      "resource_limits": {
+        "cpus": 2,
+        "memory_mb": 1024,
+        "pids": 2048,
+        "max_inflight": 8,
+        "prefetch": 32
+      },
+      "infrastructure_limits": {
+        "sink_memory_mb": 1024,
+        "sink_pids": 128,
+        "sink_cpus": 2,
+        "broker_cpus": 2,
+        "broker_memory_mb": 1024
+      },
+      "elapsed_seconds": 151.32118845684454,
+      "publication_observed_seconds": 50.76650095987134,
+      "load_metrics": {
+        "publication_window_sample_count": 79,
+        "observed_completion_rate_per_second": 94.8140681376287,
+        "backlog_slope_per_second": 100.2381979904207,
+        "peak_cgroup_memory_bytes": 141893632,
+        "peak_summed_process_rss_bytes": 175464448,
+        "last_observed_cgroup_cpu_usec": 5234762,
+        "measurement_limit": "Throughput is change in durable effects across observed publication-window samples, excluding final drain; sparse samples and generator lag can invalidate capacity inference.",
+        "generator_max_schedule_lag_seconds": 0.00022714887745678425,
+        "cpu_usec_per_correct_effect_including_startup": 523.4762
+      },
+      "latency_seconds": {
+        "p50": 30.128907442092896,
+        "p95": 93.04667782783508,
+        "p99": 98.66899108886719,
+        "completed_effects": 10000,
+        "unresolved_healthy": 0,
+        "basis": "Scheduled publisher wall time to durable sink commit, successes only with unresolved count retained."
+      },
+      "verdict": {
+        "success": true,
+        "accepted": 10000,
+        "correct_effects": 10000,
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 8,
+        "http_concurrency_verified": true,
+        "drained": true,
+        "http_attempts": 10000,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified.",
+        "publication_missing_count": 0,
+        "missing_effects_count": 0,
+        "missing_poison_count": 0,
+        "incorrect_effects_count": 0,
+        "incorrect_deadletters_count": 0
+      },
+      "cleanup_errors": [],
+      "scalable_capacity_qualified": false,
+      "publication_seconds": 49.99529152410105,
+      "uncertain_confirm_count": 0,
+      "actual_confirmed_rate_per_second": 200.01883567734245,
+      "peak_sampled_backlog": 5262,
+      "sink_observed_processing_seconds": {
+        "p50": 0.10107779502868652,
+        "p99": 0.17190074920654297,
+        "max": 0.922222375869751
+      },
+      "sink_processing_spans_over_request_timeout": 0,
+      "unfinished_sink_attempts": 0,
+      "snapshot_effect_identities_consistent": true,
+      "analysis_qualification": "development_observations_only",
+      "analysis_note": "Historical receipts preserved. Sink spans beyond the request timeout or non-atomic snapshot differences prevent a qualified concurrency/capacity interpretation; cause is not attributed solely to infrastructure."
+    },
+    {
+      "stack": "rust",
+      "concurrency": 8,
+      "receipt": "results/queue-load-rust-c8/result.json",
+      "receipt_sha256": "f2ac1565367f721f9059e1cee3a0886e5312c0164eab288e6a4df0d47c9a3f99",
+      "validity": "valid_development",
+      "images": {
+        "worker": "sha256:5c3854ab62ebe5584dd534bd2aa046a6507b76d58f100b6c72449b91257d66a2",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:ffc0d5fa786ede14e119b6f9d2393d53d7adb989a91ed54e4725573ba5458187"
+      },
+      "manifest_sha256": "e23c469b76c5d9341adee59695ff58e5e62ed051aca36cd7bb492c873038572c",
+      "requested_events": 10000,
+      "seed": 20261010,
+      "offered_rate": 200.0,
+      "payload_bytes": 4096,
+      "resource_limits": {
+        "cpus": 2,
+        "memory_mb": 1024,
+        "pids": 2048,
+        "max_inflight": 8,
+        "prefetch": 32
+      },
+      "infrastructure_limits": {
+        "sink_memory_mb": 1024,
+        "sink_pids": 128,
+        "sink_cpus": 2,
+        "broker_cpus": 2,
+        "broker_memory_mb": 1024
+      },
+      "elapsed_seconds": 151.40687578287907,
+      "publication_observed_seconds": 50.30362037499435,
+      "load_metrics": {
+        "publication_window_sample_count": 75,
+        "observed_completion_rate_per_second": 94.628748517408,
+        "backlog_slope_per_second": 97.75943962246733,
+        "peak_cgroup_memory_bytes": 16797696,
+        "peak_summed_process_rss_bytes": 15179776,
+        "last_observed_cgroup_cpu_usec": 3532056,
+        "measurement_limit": "Throughput is change in durable effects across observed publication-window samples, excluding final drain; sparse samples and generator lag can invalidate capacity inference.",
+        "generator_max_schedule_lag_seconds": 0.0036433320492506027,
+        "cpu_usec_per_correct_effect_including_startup": 353.2056
+      },
+      "latency_seconds": {
+        "p50": 30.103190898895264,
+        "p95": 93.1029441356659,
+        "p99": 98.78659534454346,
+        "completed_effects": 10000,
+        "unresolved_healthy": 0,
+        "basis": "Scheduled publisher wall time to durable sink commit, successes only with unresolved count retained."
+      },
+      "verdict": {
+        "success": true,
+        "accepted": 10000,
+        "correct_effects": 10000,
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 8,
+        "http_concurrency_verified": true,
+        "drained": true,
+        "http_attempts": 10000,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified.",
+        "publication_missing_count": 0,
+        "missing_effects_count": 0,
+        "missing_poison_count": 0,
+        "incorrect_effects_count": 0,
+        "incorrect_deadletters_count": 0
+      },
+      "cleanup_errors": [],
+      "scalable_capacity_qualified": false,
+      "publication_seconds": 49.99535096506588,
+      "uncertain_confirm_count": 0,
+      "actual_confirmed_rate_per_second": 200.01859786897933,
+      "peak_sampled_backlog": 5252,
+      "sink_observed_processing_seconds": {
+        "p50": 0.10256409645080566,
+        "p99": 0.17496633529663086,
+        "max": 0.38802146911621094
+      },
+      "sink_processing_spans_over_request_timeout": 0,
+      "unfinished_sink_attempts": 0,
+      "snapshot_effect_identities_consistent": true,
+      "analysis_qualification": "development_observations_only",
+      "analysis_note": "Historical receipts preserved. Sink spans beyond the request timeout or non-atomic snapshot differences prevent a qualified concurrency/capacity interpretation; cause is not attributed solely to infrastructure."
+    },
+    {
+      "stack": "rails",
+      "concurrency": 8,
+      "receipt": "results/queue-load-rails-c8/result.json",
+      "receipt_sha256": "aeaaeb152c7f516b37795172d03623f0348783f378b2a4770f2a0c974cde3271",
+      "validity": "valid_development",
+      "images": {
+        "worker": "sha256:90398d4a67b6ef53fa6ab403edb9aeb8d88a4831b3a1f006f28ffb4599c74bb1",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:ffc0d5fa786ede14e119b6f9d2393d53d7adb989a91ed54e4725573ba5458187"
+      },
+      "manifest_sha256": "e23c469b76c5d9341adee59695ff58e5e62ed051aca36cd7bb492c873038572c",
+      "requested_events": 10000,
+      "seed": 20261010,
+      "offered_rate": 200.0,
+      "payload_bytes": 4096,
+      "resource_limits": {
+        "cpus": 2,
+        "memory_mb": 1024,
+        "pids": 2048,
+        "max_inflight": 8,
+        "prefetch": 32
+      },
+      "infrastructure_limits": {
+        "sink_memory_mb": 1024,
+        "sink_pids": 128,
+        "sink_cpus": 2,
+        "broker_cpus": 2,
+        "broker_memory_mb": 1024
+      },
+      "elapsed_seconds": 154.89709272817709,
+      "publication_observed_seconds": 50.50156826013699,
+      "load_metrics": {
+        "publication_window_sample_count": 68,
+        "observed_completion_rate_per_second": 92.67320527754333,
+        "backlog_slope_per_second": 99.65670490289021,
+        "peak_cgroup_memory_bytes": 83013632,
+        "peak_summed_process_rss_bytes": 83853312,
+        "last_observed_cgroup_cpu_usec": 6877371,
+        "measurement_limit": "Throughput is change in durable effects across observed publication-window samples, excluding final drain; sparse samples and generator lag can invalidate capacity inference.",
+        "generator_max_schedule_lag_seconds": 0.002449482912197709,
+        "cpu_usec_per_correct_effect_including_startup": 687.7371
+      },
+      "latency_seconds": {
+        "p50": 31.92919158935547,
+        "p95": 96.87413215637207,
+        "p99": 102.60820412635803,
+        "completed_effects": 10000,
+        "unresolved_healthy": 0,
+        "basis": "Scheduled publisher wall time to durable sink commit, successes only with unresolved count retained."
+      },
+      "verdict": {
+        "success": true,
+        "accepted": 10000,
+        "correct_effects": 10000,
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 8,
+        "http_concurrency_verified": true,
+        "drained": true,
+        "http_attempts": 10000,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified.",
+        "publication_missing_count": 0,
+        "missing_effects_count": 0,
+        "missing_poison_count": 0,
+        "incorrect_effects_count": 0,
+        "incorrect_deadletters_count": 0
+      },
+      "cleanup_errors": [],
+      "scalable_capacity_qualified": false,
+      "publication_seconds": 49.99548191204667,
+      "uncertain_confirm_count": 0,
+      "actual_confirmed_rate_per_second": 200.0180739850104,
+      "peak_sampled_backlog": 5353,
+      "sink_observed_processing_seconds": {
+        "p50": 0.08948874473571777,
+        "p99": 0.18901467323303223,
+        "max": 0.7874717712402344
+      },
+      "sink_processing_spans_over_request_timeout": 0,
+      "unfinished_sink_attempts": 0,
+      "snapshot_effect_identities_consistent": true,
+      "analysis_qualification": "development_observations_only",
+      "analysis_note": "Historical receipts preserved. Sink spans beyond the request timeout or non-atomic snapshot differences prevent a qualified concurrency/capacity interpretation; cause is not attributed solely to infrastructure."
+    },
+    {
+      "stack": "ruby",
+      "concurrency": 8,
+      "receipt": "results/queue-load-ruby-c8/result.json",
+      "receipt_sha256": "5f86f744ba72b119ebf06f22bb108a840a5366d2a26ab50b44b009a1521bc56f",
+      "validity": "valid_development",
+      "images": {
+        "worker": "sha256:eeb74c5ad9ec3feedd6a169783239fa8d13a8a3e80d4f7fb657e92ac6d7e185d",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:ffc0d5fa786ede14e119b6f9d2393d53d7adb989a91ed54e4725573ba5458187"
+      },
+      "manifest_sha256": "e23c469b76c5d9341adee59695ff58e5e62ed051aca36cd7bb492c873038572c",
+      "requested_events": 10000,
+      "seed": 20261010,
+      "offered_rate": 200.0,
+      "payload_bytes": 4096,
+      "resource_limits": {
+        "cpus": 2,
+        "memory_mb": 1024,
+        "pids": 2048,
+        "max_inflight": 8,
+        "prefetch": 32
+      },
+      "infrastructure_limits": {
+        "sink_memory_mb": 1024,
+        "sink_pids": 128,
+        "sink_cpus": 2,
+        "broker_cpus": 2,
+        "broker_memory_mb": 1024
+      },
+      "elapsed_seconds": 154.7458833330311,
+      "publication_observed_seconds": 51.090630636084825,
+      "load_metrics": {
+        "publication_window_sample_count": 68,
+        "observed_completion_rate_per_second": 92.53107414794785,
+        "backlog_slope_per_second": 100.09658785198494,
+        "peak_cgroup_memory_bytes": 40022016,
+        "peak_summed_process_rss_bytes": 45412352,
+        "last_observed_cgroup_cpu_usec": 7044609,
+        "measurement_limit": "Throughput is change in durable effects across observed publication-window samples, excluding final drain; sparse samples and generator lag can invalidate capacity inference.",
+        "generator_max_schedule_lag_seconds": 0.050984631991013885,
+        "cpu_usec_per_correct_effect_including_startup": 704.4609
+      },
+      "latency_seconds": {
+        "p50": 32.1150918006897,
+        "p95": 96.46040749549866,
+        "p99": 102.19567966461182,
+        "completed_effects": 10000,
+        "unresolved_healthy": 0,
+        "basis": "Scheduled publisher wall time to durable sink commit, successes only with unresolved count retained."
+      },
+      "verdict": {
+        "success": true,
+        "accepted": 10000,
+        "correct_effects": 10000,
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 8,
+        "http_concurrency_verified": true,
+        "drained": true,
+        "http_attempts": 10000,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified.",
+        "publication_missing_count": 0,
+        "missing_effects_count": 0,
+        "missing_poison_count": 0,
+        "incorrect_effects_count": 0,
+        "incorrect_deadletters_count": 0
+      },
+      "cleanup_errors": [],
+      "scalable_capacity_qualified": false,
+      "publication_seconds": 49.99536075303331,
+      "uncertain_confirm_count": 0,
+      "actual_confirmed_rate_per_second": 200.01855870983553,
+      "peak_sampled_backlog": 5356,
+      "sink_observed_processing_seconds": {
+        "p50": 0.08973860740661621,
+        "p99": 0.18735003471374512,
+        "max": 0.2731657028198242
+      },
+      "sink_processing_spans_over_request_timeout": 0,
+      "unfinished_sink_attempts": 0,
+      "snapshot_effect_identities_consistent": true,
+      "analysis_qualification": "development_observations_only",
+      "analysis_note": "Historical receipts preserved. Sink spans beyond the request timeout or non-atomic snapshot differences prevent a qualified concurrency/capacity interpretation; cause is not attributed solely to infrastructure."
+    },
+    {
+      "stack": "elixir",
+      "concurrency": 64,
+      "receipt": "results/queue-load-elixir-c64/result.json",
+      "receipt_sha256": "cc01249bd0dc08f3f847fb18a572d246b385c9ce21e4cbc731dc4ff030dac45e",
+      "validity": "valid_development",
+      "images": {
+        "worker": "sha256:17d943355aaa4c24dbd7f9c9784f38cc25c43c52572d8e27a0a54ef9129b4005",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:ffc0d5fa786ede14e119b6f9d2393d53d7adb989a91ed54e4725573ba5458187"
+      },
+      "manifest_sha256": "e23c469b76c5d9341adee59695ff58e5e62ed051aca36cd7bb492c873038572c",
+      "requested_events": 10000,
+      "seed": 20261010,
+      "offered_rate": 200.0,
+      "payload_bytes": 4096,
+      "resource_limits": {
+        "cpus": 2,
+        "memory_mb": 1024,
+        "pids": 2048,
+        "max_inflight": 64,
+        "prefetch": 256
+      },
+      "infrastructure_limits": {
+        "sink_memory_mb": 1024,
+        "sink_pids": 320,
+        "sink_cpus": 2,
+        "broker_cpus": 2,
+        "broker_memory_mb": 1024
+      },
+      "elapsed_seconds": 171.0605861558579,
+      "publication_observed_seconds": 50.52903282898478,
+      "load_metrics": {
+        "publication_window_sample_count": 74,
+        "observed_completion_rate_per_second": 84.77258440021451,
+        "backlog_slope_per_second": 106.62538595495933,
+        "peak_cgroup_memory_bytes": 168546304,
+        "peak_summed_process_rss_bytes": 199454720,
+        "last_observed_cgroup_cpu_usec": 9346485,
+        "measurement_limit": "Throughput is change in durable effects across observed publication-window samples, excluding final drain; sparse samples and generator lag can invalidate capacity inference.",
+        "generator_max_schedule_lag_seconds": 0.0013222480192780495,
+        "cpu_usec_per_correct_effect_including_startup": 1180.8572331017056
+      },
+      "latency_seconds": {
+        "p50": 21.563716888427734,
+        "p95": 119.76249957084656,
+        "p99": 128.9683883190155,
+        "completed_effects": 7916,
+        "unresolved_healthy": 2085,
+        "basis": "Scheduled publisher wall time to durable sink commit, successes only with unresolved count retained."
+      },
+      "verdict": {
+        "success": false,
+        "accepted": 10000,
+        "correct_effects": 7915,
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 63,
+        "http_concurrency_verified": true,
+        "drained": false,
+        "http_attempts": 12449,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified.",
+        "publication_missing_count": 0,
+        "missing_effects_count": 2085,
+        "missing_effects_examples": [
+          [
+            "t2",
+            "e002633"
+          ],
+          [
+            "t1",
+            "e002636"
+          ],
+          [
+            "t1",
+            "e002637"
+          ]
+        ],
+        "missing_poison_count": 0,
+        "incorrect_effects_count": 0,
+        "incorrect_deadletters_count": 0
+      },
+      "cleanup_errors": [],
+      "scalable_capacity_qualified": false,
+      "publication_seconds": 49.99539119401015,
+      "uncertain_confirm_count": 0,
+      "actual_confirmed_rate_per_second": 200.01843692340344,
+      "peak_sampled_backlog": 5797,
+      "sink_observed_processing_seconds": {
+        "p50": 0.635671854019165,
+        "p99": 1.56351637840271,
+        "max": 3.212160587310791
+      },
+      "sink_processing_spans_over_request_timeout": 1144,
+      "unfinished_sink_attempts": 44,
+      "snapshot_effect_identities_consistent": false,
+      "analysis_qualification": "measurement_unqualified",
+      "analysis_note": "Historical receipts preserved. Sink spans beyond the request timeout or non-atomic snapshot differences prevent a qualified concurrency/capacity interpretation; cause is not attributed solely to infrastructure."
+    },
+    {
+      "stack": "rust",
+      "concurrency": 64,
+      "receipt": "results/queue-load-rust-c64/result.json",
+      "receipt_sha256": "45f5bba24f8530fe089d24926003c088b35107e12cb449721697d3d4fe95eafa",
+      "validity": "valid_development",
+      "images": {
+        "worker": "sha256:5c3854ab62ebe5584dd534bd2aa046a6507b76d58f100b6c72449b91257d66a2",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:ffc0d5fa786ede14e119b6f9d2393d53d7adb989a91ed54e4725573ba5458187"
+      },
+      "manifest_sha256": "e23c469b76c5d9341adee59695ff58e5e62ed051aca36cd7bb492c873038572c",
+      "requested_events": 10000,
+      "seed": 20261010,
+      "offered_rate": 200.0,
+      "payload_bytes": 4096,
+      "resource_limits": {
+        "cpus": 2,
+        "memory_mb": 1024,
+        "pids": 2048,
+        "max_inflight": 64,
+        "prefetch": 256
+      },
+      "infrastructure_limits": {
+        "sink_memory_mb": 1024,
+        "sink_pids": 320,
+        "sink_cpus": 2,
+        "broker_cpus": 2,
+        "broker_memory_mb": 1024
+      },
+      "elapsed_seconds": 170.7885342510417,
+      "publication_observed_seconds": 50.47513924492523,
+      "load_metrics": {
+        "publication_window_sample_count": 80,
+        "observed_completion_rate_per_second": 88.24782810920216,
+        "backlog_slope_per_second": 100.53763301399678,
+        "peak_cgroup_memory_bytes": 23662592,
+        "peak_summed_process_rss_bytes": 18808832,
+        "last_observed_cgroup_cpu_usec": 3261697,
+        "measurement_limit": "Throughput is change in durable effects across observed publication-window samples, excluding final drain; sparse samples and generator lag can invalidate capacity inference.",
+        "generator_max_schedule_lag_seconds": 0.0023410620633512735,
+        "cpu_usec_per_correct_effect_including_startup": 400.1591215801742
+      },
+      "latency_seconds": {
+        "p50": 19.75702214241028,
+        "p95": 118.37423920631409,
+        "p99": 127.71632838249207,
+        "completed_effects": 8151,
+        "unresolved_healthy": 1849,
+        "basis": "Scheduled publisher wall time to durable sink commit, successes only with unresolved count retained."
+      },
+      "verdict": {
+        "success": false,
+        "accepted": 10000,
+        "correct_effects": 8151,
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 67,
+        "http_concurrency_verified": false,
+        "drained": false,
+        "http_attempts": 12545,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified.",
+        "publication_missing_count": 0,
+        "missing_effects_count": 1849,
+        "missing_effects_examples": [
+          [
+            "t2",
+            "e002710"
+          ],
+          [
+            "t0",
+            "e002711"
+          ],
+          [
+            "t2",
+            "e002712"
+          ]
+        ],
+        "missing_poison_count": 0,
+        "incorrect_effects_count": 0,
+        "incorrect_deadletters_count": 0
+      },
+      "cleanup_errors": [],
+      "scalable_capacity_qualified": false,
+      "publication_seconds": 49.995307703036815,
+      "uncertain_confirm_count": 0,
+      "actual_confirmed_rate_per_second": 200.01877094943012,
+      "peak_sampled_backlog": 5643,
+      "sink_observed_processing_seconds": {
+        "p50": 0.6261610984802246,
+        "p99": 1.5431838035583496,
+        "max": 2.845844030380249
+      },
+      "sink_processing_spans_over_request_timeout": 1154,
+      "unfinished_sink_attempts": 49,
+      "snapshot_effect_identities_consistent": true,
+      "analysis_qualification": "measurement_unqualified",
+      "analysis_note": "Historical receipts preserved. Sink spans beyond the request timeout or non-atomic snapshot differences prevent a qualified concurrency/capacity interpretation; cause is not attributed solely to infrastructure."
+    },
+    {
+      "stack": "rails",
+      "concurrency": 64,
+      "receipt": "results/queue-load-rails-c64/result.json",
+      "receipt_sha256": "83e260a88a1f81ff35decdba318a053d60612cc9d0ba05889f7c9c9052b536c2",
+      "validity": "valid_development",
+      "images": {
+        "worker": "sha256:90398d4a67b6ef53fa6ab403edb9aeb8d88a4831b3a1f006f28ffb4599c74bb1",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:ffc0d5fa786ede14e119b6f9d2393d53d7adb989a91ed54e4725573ba5458187"
+      },
+      "manifest_sha256": "e23c469b76c5d9341adee59695ff58e5e62ed051aca36cd7bb492c873038572c",
+      "requested_events": 10000,
+      "seed": 20261010,
+      "offered_rate": 200.0,
+      "payload_bytes": 4096,
+      "resource_limits": {
+        "cpus": 2,
+        "memory_mb": 1024,
+        "pids": 2048,
+        "max_inflight": 64,
+        "prefetch": 256
+      },
+      "infrastructure_limits": {
+        "sink_memory_mb": 1024,
+        "sink_pids": 320,
+        "sink_cpus": 2,
+        "broker_cpus": 2,
+        "broker_memory_mb": 1024
+      },
+      "elapsed_seconds": 171.1603932401631,
+      "publication_observed_seconds": 50.64469878305681,
+      "load_metrics": {
+        "publication_window_sample_count": 78,
+        "observed_completion_rate_per_second": 88.51816829142547,
+        "backlog_slope_per_second": 101.30988155596262,
+        "peak_cgroup_memory_bytes": 91185152,
+        "peak_summed_process_rss_bytes": 94990336,
+        "last_observed_cgroup_cpu_usec": 7444788,
+        "measurement_limit": "Throughput is change in durable effects across observed publication-window samples, excluding final drain; sparse samples and generator lag can invalidate capacity inference.",
+        "generator_max_schedule_lag_seconds": 0.0005535809323191643,
+        "cpu_usec_per_correct_effect_including_startup": 918.2027627035027
+      },
+      "latency_seconds": {
+        "p50": 20.04930353164673,
+        "p95": 118.54470705986023,
+        "p99": 128.23791527748108,
+        "completed_effects": 8109,
+        "unresolved_healthy": 1892,
+        "basis": "Scheduled publisher wall time to durable sink commit, successes only with unresolved count retained."
+      },
+      "verdict": {
+        "success": false,
+        "accepted": 10000,
+        "correct_effects": 8108,
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 63,
+        "http_concurrency_verified": true,
+        "drained": false,
+        "http_attempts": 12562,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified.",
+        "publication_missing_count": 0,
+        "missing_effects_count": 1892,
+        "missing_effects_examples": [
+          [
+            "t2",
+            "e002699"
+          ],
+          [
+            "t0",
+            "e002700"
+          ],
+          [
+            "t1",
+            "e002702"
+          ]
+        ],
+        "missing_poison_count": 0,
+        "incorrect_effects_count": 0,
+        "incorrect_deadletters_count": 0
+      },
+      "cleanup_errors": [],
+      "scalable_capacity_qualified": false,
+      "publication_seconds": 49.995268342783675,
+      "uncertain_confirm_count": 0,
+      "actual_confirmed_rate_per_second": 200.01892842012123,
+      "peak_sampled_backlog": 5652,
+      "sink_observed_processing_seconds": {
+        "p50": 0.6320092678070068,
+        "p99": 1.5402286052703857,
+        "max": 2.468127965927124
+      },
+      "sink_processing_spans_over_request_timeout": 1106,
+      "unfinished_sink_attempts": 48,
+      "snapshot_effect_identities_consistent": false,
+      "analysis_qualification": "measurement_unqualified",
+      "analysis_note": "Historical receipts preserved. Sink spans beyond the request timeout or non-atomic snapshot differences prevent a qualified concurrency/capacity interpretation; cause is not attributed solely to infrastructure."
+    },
+    {
+      "stack": "ruby",
+      "concurrency": 64,
+      "receipt": "results/queue-load-ruby-c64/result.json",
+      "receipt_sha256": "1579c6b795926aa07e408ca6a9e182021cf91744ff4f5b38bdeef55887d0fba0",
+      "validity": "valid_development",
+      "images": {
+        "worker": "sha256:eeb74c5ad9ec3feedd6a169783239fa8d13a8a3e80d4f7fb657e92ac6d7e185d",
+        "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+        "infra": "sha256:ffc0d5fa786ede14e119b6f9d2393d53d7adb989a91ed54e4725573ba5458187"
+      },
+      "manifest_sha256": "e23c469b76c5d9341adee59695ff58e5e62ed051aca36cd7bb492c873038572c",
+      "requested_events": 10000,
+      "seed": 20261010,
+      "offered_rate": 200.0,
+      "payload_bytes": 4096,
+      "resource_limits": {
+        "cpus": 2,
+        "memory_mb": 1024,
+        "pids": 2048,
+        "max_inflight": 64,
+        "prefetch": 256
+      },
+      "infrastructure_limits": {
+        "sink_memory_mb": 1024,
+        "sink_pids": 320,
+        "sink_cpus": 2,
+        "broker_cpus": 2,
+        "broker_memory_mb": 1024
+      },
+      "elapsed_seconds": 170.9125210859347,
+      "publication_observed_seconds": 50.887067741015926,
+      "load_metrics": {
+        "publication_window_sample_count": 78,
+        "observed_completion_rate_per_second": 88.0335227583166,
+        "backlog_slope_per_second": 100.8090972094168,
+        "peak_cgroup_memory_bytes": 62885888,
+        "peak_summed_process_rss_bytes": 66527232,
+        "last_observed_cgroup_cpu_usec": 7878881,
+        "measurement_limit": "Throughput is change in durable effects across observed publication-window samples, excluding final drain; sparse samples and generator lag can invalidate capacity inference.",
+        "generator_max_schedule_lag_seconds": 0.20075802295468748,
+        "cpu_usec_per_correct_effect_including_startup": 974.9883677762654
+      },
+      "latency_seconds": {
+        "p50": 18.84637427330017,
+        "p95": 118.61443853378296,
+        "p99": 127.49342393875122,
+        "completed_effects": 8082,
+        "unresolved_healthy": 1919,
+        "basis": "Scheduled publisher wall time to durable sink commit, successes only with unresolved count retained."
+      },
+      "verdict": {
+        "success": false,
+        "accepted": 10000,
+        "correct_effects": 8081,
+        "wrong_attempts": 0,
+        "peak_observed_sink_handlers": 66,
+        "http_concurrency_verified": false,
+        "drained": false,
+        "http_attempts": 12608,
+        "deadletter_copies": 0,
+        "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified.",
+        "publication_missing_count": 0,
+        "missing_effects_count": 1919,
+        "missing_effects_examples": [
+          [
+            "t2",
+            "e002690"
+          ],
+          [
+            "t1",
+            "e002691"
+          ],
+          [
+            "t2",
+            "e002692"
+          ]
+        ],
+        "missing_poison_count": 0,
+        "incorrect_effects_count": 0,
+        "incorrect_deadletters_count": 0
+      },
+      "cleanup_errors": [],
+      "scalable_capacity_qualified": false,
+      "publication_seconds": 49.995272459927946,
+      "uncertain_confirm_count": 0,
+      "actual_confirmed_rate_per_second": 200.0189119484281,
+      "peak_sampled_backlog": 5667,
+      "sink_observed_processing_seconds": {
+        "p50": 0.6297745704650879,
+        "p99": 1.5239160060882568,
+        "max": 2.7388198375701904
+      },
+      "sink_processing_spans_over_request_timeout": 1198,
+      "unfinished_sink_attempts": 51,
+      "snapshot_effect_identities_consistent": false,
+      "analysis_qualification": "measurement_unqualified",
+      "analysis_note": "Historical receipts preserved. Sink spans beyond the request timeout or non-atomic snapshot differences prevent a qualified concurrency/capacity interpretation; cause is not attributed solely to infrastructure."
+    }
+  ],
+  "limitations": [
+    "One runtime trial per stack/profile, fixed nonrandomized order, shared host.",
+    "References authored with coding-agent assistance during benchmark development, not independent budget-matched coding attempts.",
+    "No measured infrastructure headroom, long soak, capacity staircase or preregistered latency SLO.",
+    "Completion rate covers publication-window samples; eventual drain is separate.",
+    "Sink processing spans exclude some request admission/response overhead and are not full client request latency.",
+    "Source line counts exclude library implementation and cannot establish engineering effort."
+  ],
+  "source_inventory": {
+    "elixir": {
+      "starter": {
+        "physical_lines": 56,
+        "files": {
+          "scalability/workers/elixir/starter/lib/application.ex": "09d2b1a10cb95daf150763b62f69565d62f676f49f433f9f95aed6b238887361",
+          "scalability/workers/elixir/starter/lib/fault.ex": "d701a3c246cef2443614ce89d9aac6f1e325cb824e23a9d1fba8a04db1c095a6",
+          "scalability/workers/elixir/starter/lib/pipeline.ex": "46970d1f7aa26792ce812a372f5f67e29be412b902afc8c0629d53c08ca06481",
+          "scalability/workers/elixir/starter/mix.exs": "d54143c2ab4f121fb904b329e3f6ae5f2834748b1c92a45608053feaaefaca31"
+        }
+      },
+      "reference": {
+        "physical_lines": 162,
+        "files": {
+          "scalability/workers/elixir/reference/lib/application.ex": "146c43ea512917c3833e957407b8d0bfd735c742cd5363b6e328422542149930",
+          "scalability/workers/elixir/reference/lib/fault.ex": "d701a3c246cef2443614ce89d9aac6f1e325cb824e23a9d1fba8a04db1c095a6",
+          "scalability/workers/elixir/reference/lib/pipeline.ex": "f136ce7d31606ecd5cfc18314c959c1f915c92a63344b9e45af9e653f2b64d66",
+          "scalability/workers/elixir/reference/lib/publisher.ex": "3f9499fb341575fd8806849c22f9c773b2ed4ff4059cd97971a24cd963f332ab",
+          "scalability/workers/elixir/reference/mix.exs": "d54143c2ab4f121fb904b329e3f6ae5f2834748b1c92a45608053feaaefaca31"
+        }
+      }
+    },
+    "rust": {
+      "starter": {
+        "physical_lines": 93,
+        "files": {
+          "scalability/workers/rust/starter/src/fault.rs": "ececf0a087eb46ab69cf6ea95b282edde6f2ceff0e86f4cb892956be8d80353a",
+          "scalability/workers/rust/starter/src/main.rs": "80804d77a5aafef17e63113502304784c95abfb85b05d3dce653dc6fce89da2c"
+        }
+      },
+      "reference": {
+        "physical_lines": 203,
+        "files": {
+          "scalability/workers/rust/reference/src/fault.rs": "ececf0a087eb46ab69cf6ea95b282edde6f2ceff0e86f4cb892956be8d80353a",
+          "scalability/workers/rust/reference/src/main.rs": "b262b11821d79eb305757f5fa0620b5486494a083b76313f4203e2837206726e"
+        }
+      }
+    },
+    "ruby": {
+      "starter": {
+        "physical_lines": 56,
+        "files": {
+          "scalability/workers/ruby/starter/lib/handler_fault.rb": "5bdd4cc214f8ce62f4fc81b44c3b71359e0c3203c8d45faff611a95bb8691f33",
+          "scalability/workers/ruby/starter/lib/worker.rb": "5b2e31008eeb038a1ec76f9211dd6844f6085161a3e4e6cdadc4324abc227006",
+          "scalability/workers/ruby/starter/main.rb": "62b08684d869c615bf64fcb685b0423c2f0fc1ecfa8bc55374cce5d5927e0e17"
+        }
+      },
+      "reference": {
+        "physical_lines": 128,
+        "files": {
+          "scalability/workers/ruby/reference/lib/handler_fault.rb": "5bdd4cc214f8ce62f4fc81b44c3b71359e0c3203c8d45faff611a95bb8691f33",
+          "scalability/workers/ruby/reference/lib/worker.rb": "085e872436f2c19ae85dffccbf44d23b6c4674c7462a6d8470182343adeb1d85",
+          "scalability/workers/ruby/reference/main.rb": "62b08684d869c615bf64fcb685b0423c2f0fc1ecfa8bc55374cce5d5927e0e17"
+        }
+      }
+    },
+    "rails": {
+      "starter": {
+        "physical_lines": 74,
+        "files": {
+          "scalability/workers/rails/starter/config/application.rb": "73e3109cdbce128ac32d72538739ca4952bc637c914cab1925d125ac86ff69c7",
+          "scalability/workers/rails/starter/lib/handler_fault.rb": "5bdd4cc214f8ce62f4fc81b44c3b71359e0c3203c8d45faff611a95bb8691f33",
+          "scalability/workers/rails/starter/lib/worker.rb": "5b2e31008eeb038a1ec76f9211dd6844f6085161a3e4e6cdadc4324abc227006",
+          "scalability/workers/rails/starter/main.rb": "593e0048c721b5416d88e894d3e3ac12233428b1d78f7ed5028f1ba0bcad2892"
+        }
+      },
+      "reference": {
+        "physical_lines": 146,
+        "files": {
+          "scalability/workers/rails/reference/config/application.rb": "73e3109cdbce128ac32d72538739ca4952bc637c914cab1925d125ac86ff69c7",
+          "scalability/workers/rails/reference/lib/handler_fault.rb": "5bdd4cc214f8ce62f4fc81b44c3b71359e0c3203c8d45faff611a95bb8691f33",
+          "scalability/workers/rails/reference/lib/worker.rb": "085e872436f2c19ae85dffccbf44d23b6c4674c7462a6d8470182343adeb1d85",
+          "scalability/workers/rails/reference/main.rb": "593e0048c721b5416d88e894d3e3ac12233428b1d78f7ed5028f1ba0bcad2892"
+        }
+      }
+    }
+  },
+  "collection_source_commit": "7a510e3",
+  "collection_source_hashes": {
+    "scalability/runner.py": "f38dbc3cfb2887e953b7cb94cf12ec42ed422078c7451bda094961fc898bcbbb",
+    "scalability/infra/sink.py": "3d7bda146dd19c2b30e5f2717cb6b907cc7c135b79d11084a7b3335e12b66eef",
+    "scalability/infra/producer.py": "91e9d27aa04492820e544d516e0746a4078eb4c2e98cd1312846ee88dfd00c40"
+  },
+  "historical_receipt_interpretation_corrections": [
+    "Latency basis is scheduled arrival to a pre-commit transaction timestamp, not exact durability completion; the recorded committed field predates DB.commit().",
+    "http_concurrency_verified in these historical receipts must not be interpreted as proof of client concurrency. Server overlap can include timed-out requests.",
+    "Final snapshots were not yet transactionally consistent; effect and timestamp identities are explicitly compared in this summary.",
+    "Raw verdicts and receipt hashes are retained; analysis_qualification adds the measurement limitations without rewriting original evidence."
+  ],
+  "measurement_correction_validation": {
+    "receipt": "results/queue-measurement-clean/result.json",
+    "receipt_sha256": "b1b734c227a0666f2e5bb056fd4633e56b2f617eb8db5692e23225d708b4f2c3",
+    "runner_source_sha256": "5c39dae749d053cda9f16f91b38a52b00dd46353170f7fd7d5e4340c40824571",
+    "validity": "valid_development",
+    "verdict": {
+      "success": true,
+      "correctness_and_drain_passed": true,
+      "concurrency_measurement": {
+        "required": true,
+        "qualified": true,
+        "unfinished_attempts": 0,
+        "timeout_exceeding_spans": 0,
+        "request_timeout_seconds": 1.0,
+        "cause": null,
+        "basis": "Observed sink processing intervals, excluding final commit completion and network/admission time; not proof of client concurrency."
+      },
+      "observed_sink_processing_bound_passed": true,
+      "publication_missing": [],
+      "accepted": 96,
+      "correct_effects": 96,
+      "missing_effects": [],
+      "missing_poison": [],
+      "incorrect_effects": [],
+      "incorrect_deadletters": [],
+      "wrong_attempts": 0,
+      "peak_observed_sink_handlers": 1,
+      "http_concurrency_verified": null,
+      "drained": true,
+      "http_attempts": 96,
+      "deadletter_copies": 0,
+      "retry_policy_verification": "Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified."
+    },
+    "latency_seconds": {
+      "p50": 0.9458911418914795,
+      "p95": 1.652329921722412,
+      "p99": 1.7106411457061768,
+      "completed_effects": 96,
+      "unresolved_healthy": 0,
+      "basis": "Scheduled publisher wall time to pre-commit transaction timestamp of a subsequently committed effect; excludes commit completion time. Successes only, unresolved count retained."
+    },
+    "cleanup_errors": [],
+    "images": {
+      "worker": "sha256:ffc0d5fa786ede14e119b6f9d2393d53d7adb989a91ed54e4725573ba5458187",
+      "broker": "sha256:7c23a4fa56b02b3ee5aa8529ebb827b55f260f23ba3e60956ac5afc0fea9d375",
+      "infra": "sha256:ffc0d5fa786ede14e119b6f9d2393d53d7adb989a91ed54e4725573ba5458187"
+    },
+    "focused_tests_passed": 25,
+    "independent_review": "passed",
+    "historical_overlap_recheck": "results/queue-measurement-overlap-recheck.json",
+    "note": "Corrected clean runtime and deterministic concurrent-writer regression qualify the snapshot fix; this does not repeat the eight historical load trials or establish capacity.",
+    "full_regression": {
+      "command": "python -m unittest discover -s tests -v",
+      "tests": 133,
+      "seconds": 35.398,
+      "passed": true
+    }
+  }
+}

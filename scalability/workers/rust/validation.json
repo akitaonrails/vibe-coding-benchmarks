@@ -231,5 +231,9 @@
     "Original evaluator counter-race receipts and Elixir CA packaging failure remain preserved in results/."
   ],
   "controlled_coding_trial": false,
-  "artifact_provenance": "Reference authored during benchmark development with coding-agent assistance; not a blinded or budget-matched participant attempt."
+  "artifact_provenance": "Reference authored during benchmark development with coding-agent assistance; not a blinded or budget-matched participant attempt.",
+  "historical_metric_corrections": [
+    "Original http_concurrency_verified fields describe the historical sink overlap check, not proof of actual client concurrency. The corrected runner leaves that field null and reports the observed sink-processing bound separately.",
+    "Runtime reference qualifications are not sustainable-capacity results or controlled coding attempts."
+  ]
 }
