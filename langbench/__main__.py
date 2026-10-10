@@ -1,7 +1,7 @@
 import argparse
 import json
 from pathlib import Path
-from .core import TASKS, LANGUAGES, IMPLEMENTED, prepare, scaffold
+from .core import TASKS, LANGUAGES, IMPLEMENTED, prepare, scaffold, supported_languages
 from .grading import grade
 from .report import summarize
 from .appserver import DEFAULT_BINARY
@@ -26,8 +26,10 @@ def main():
     p.add_argument('--suite', choices=('public','private'), default='private')
     p.add_argument('--seed', type=int, default=0)
     p.add_argument('--backend', choices=('docker','sandbox','trusted-reference'), default='docker')
+    p.add_argument('--runtime', choices=('historical','seven'), default='historical')
     p = sub.add_parser('selftest')
     p.add_argument('--backend', choices=('docker','sandbox','trusted-reference'), default='docker')
+    p.add_argument('--runtime', choices=('historical','seven'), default='historical')
     p = sub.add_parser('report')
     p.add_argument('results', type=Path, nargs='+')
     p = sub.add_parser('qualify')
@@ -60,9 +62,29 @@ def main():
     p.add_argument('--result', type=Path)
     p = sub.add_parser('calibration-report')
     p.add_argument('results', type=Path, nargs='+')
+    p = sub.add_parser('matrix-plan')
+    p.add_argument('--seed', type=int, default=20261010)
+    p = sub.add_parser('matrix-run')
+    p.add_argument('plan', type=Path)
+    p.add_argument('destination', type=Path)
+    p.add_argument('--kimi-qualification', type=Path, required=True)
+    p.add_argument('--opencode-qualification', type=Path, required=True)
+    p.add_argument('--resume', action='store_true')
+    p = sub.add_parser('effort-report')
+    p.add_argument('directory', type=Path)
     args = parser.parse_args()
-    if args.command == 'list':
-        result = {'languages':LANGUAGES, 'implemented_languages':IMPLEMENTED, 'tasks':TASKS}
+    if args.command == 'matrix-plan':
+        from .matrix import make_plan
+        result = make_plan(args.seed)
+    elif args.command == 'matrix-run':
+        from .matrix import run_matrix
+        result = run_matrix(args.plan, args.destination, resume=args.resume,
+                            qualifications={'kimi': args.kimi_qualification, 'opencode': args.opencode_qualification})
+    elif args.command == 'effort-report':
+        from .effort_report import report_matrix
+        result = report_matrix(args.directory)
+    elif args.command == 'list':
+        result = {'languages':LANGUAGES, 'implemented_languages':IMPLEMENTED, 'tasks':TASKS, 'task_languages':{task:supported_languages(task) for task in TASKS}}
     elif args.command == 'plan':
         import random
         from importlib.resources import files
@@ -94,10 +116,11 @@ def main():
     elif args.command == 'prepare':
         result = prepare(args.task,args.language,args.tests,args.destination)
     elif args.command == 'grade':
-        result = grade(args.task,args.language,args.source,args.suite,args.seed,args.backend)
+        result = grade(args.task,args.language,args.source,args.suite,args.seed,args.backend,runtime=args.runtime)
     elif args.command == 'selftest':
-        result = [grade(task,lang,scaffold(task,lang,'reference'),backend=args.backend)
-                  for task in TASKS for lang in IMPLEMENTED]
+        result = [grade(task,lang,scaffold(task,lang,'reference'),backend=args.backend,runtime=args.runtime)
+                  for task in TASKS for lang in supported_languages(task)
+                  if args.runtime == 'seven' or lang in ('ruby','rust')]
     elif args.command == 'qualify':
         from .live import qualify
         result = qualify(args.destination,args.model,args.effort,args.seconds,args.binary)
@@ -127,6 +150,8 @@ def main():
     if args.command == 'run' and result['validity'] != 'valid_smoke':
         return 1
     if args.command == 'batch' and result['state'] != 'complete':
+        return 1
+    if args.command == 'matrix-run' and result['state'] != 'complete':
         return 1
     return 0
 

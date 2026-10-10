@@ -15,7 +15,20 @@ def reject_mounted_controller_assets(mounted_roots):
             raise RuntimeError('controller or private task assets would be exposed through a runtime mount')
 
 class DockerWorker:
-    def __init__(self, source, *, image='alpine:3.22'):
+    def __init__(self, source, *, image='alpine:3.22', runtime='historical'):
+        if runtime not in ('historical','seven'):
+            raise ValueError('unknown worker runtime')
+        self.runtime=runtime
+        if runtime=='seven':
+            from .core import ROOT
+            config=ROOT/'configs/toolchain-seven.json'
+            if not config.is_file():
+                from importlib.resources import files
+                config=files('langbench_config').joinpath('toolchain-seven.json')
+            self.runtime_config=json.loads(config.read_text())
+            image=self.runtime_config['image']
+            if not image.startswith('sha256:') or len(image)!=71:
+                raise RuntimeError('seven-language runtime requires immutable image ID')
         self.name = 'langbench-' + uuid.uuid4().hex
         self.alive = False
         self.image = None
@@ -35,30 +48,33 @@ class DockerWorker:
               '--workdir','/workspace','--env','HOME=/tmp','--env','CARGO_HOME=/cargo','--env','CARGO_NET_OFFLINE=true',
               '--env','LANG=C.UTF-8']
         mounted_roots=[]
-        for host, guest in [('/usr','/usr'),('/usr/bin','/bin'),('/usr/lib','/lib'),('/usr/lib','/lib64')]:
-            mounted_roots.append(Path(host).resolve())
-            args += ['--mount',f'type=bind,src={host},dst={guest},readonly']
-        for program in ('ruby','rustc'):
-            binary=shutil.which(program)
-            if not binary:
-                raise RuntimeError(f'required runtime unavailable: {program}')
-            resolved=Path(binary).resolve()
-            if program=='rustc':
-                query=execute([binary,'--print','sysroot'])
-                if query['returncode']:
-                    raise RuntimeError('cannot resolve Rust sysroot')
-                install=Path(query['stdout'].strip()).resolve()
-            else:
-                install=resolved.parent.parent
-            if not str(install).startswith('/usr'):
-                mounted_roots.append(install)
-                args += ['--mount',f'type=bind,src={install},dst={install},readonly']
-                self.path.insert(0,str(install/'bin'))
-        registry=Path.home()/'.cargo/registry'
-        if registry.is_dir():
-            mounted_roots.append(registry.resolve())
-            args += ['--mount',f'type=bind,src={registry},dst=/cargo/registry,readonly']
+        if runtime=='historical':
+            for host, guest in [('/usr','/usr'),('/usr/bin','/bin'),('/usr/lib','/lib'),('/usr/lib','/lib64')]:
+                mounted_roots.append(Path(host).resolve())
+                args += ['--mount',f'type=bind,src={host},dst={guest},readonly']
+            for program in ('ruby','rustc'):
+                binary=shutil.which(program)
+                if not binary:
+                    raise RuntimeError(f'required runtime unavailable: {program}')
+                resolved=Path(binary).resolve()
+                if program=='rustc':
+                    query=execute([binary,'--print','sysroot'])
+                    if query['returncode']:
+                        raise RuntimeError('cannot resolve Rust sysroot')
+                    install=Path(query['stdout'].strip()).resolve()
+                else:
+                    install=resolved.parent.parent
+                if not str(install).startswith('/usr'):
+                    mounted_roots.append(install)
+                    args += ['--mount',f'type=bind,src={install},dst={install},readonly']
+                    self.path.insert(0,str(install/'bin'))
+            registry=Path.home()/'.cargo/registry'
+            if registry.is_dir():
+                mounted_roots.append(registry.resolve())
+                args += ['--mount',f'type=bind,src={registry},dst=/cargo/registry,readonly']
         reject_mounted_controller_assets(mounted_roots)
+        if runtime=='seven':
+            args += ['--env','CARGO_HOME=/opt/cargo','--env','DOTNET_CLI_HOME=/tmp','--env','NUGET_PACKAGES=/tmp/nuget']
         args += ['--env','PATH='+':'.join(self.path),'--entrypoint','/usr/bin/sleep',self.image,'infinity']
         started=execute(args,timeout=30)
         if started['returncode']:
@@ -153,7 +169,12 @@ print(json.dumps(r))'''
         for name, size in (('/workspace','size=524288k'),('/tmp','size=65536k'),('/cargo','size=131072k')):
             if not any(line.split()[1:3]==[name,'tmpfs'] and size in line for line in mounts.splitlines()):
                 raise RuntimeError('worker temporary filesystem limits not verified')
-        info.update({'image':self.image,'workspace_bytes':536870912,'tmp_bytes':67108864,'cargo_bytes':134217728})
+        info.update({'runtime':self.runtime,'image':self.image,'workspace_bytes':536870912,'tmp_bytes':67108864,'cargo_bytes':134217728})
+        if self.runtime=='seven':
+            check=self.raw(['/usr/bin/sha256sum','/opt/toolchain-packages.lock'])
+            if check['returncode'] or check['stdout'].split()[0]!=self.runtime_config['packages_sha256']:
+                raise RuntimeError('toolchain package inventory mismatch')
+            info['packages_sha256']=self.runtime_config['packages_sha256']
         return info
 
     def export(self, destination):

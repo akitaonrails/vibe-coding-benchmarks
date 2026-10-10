@@ -4,7 +4,7 @@ import json
 import os
 from pathlib import Path
 from .appserver import DEFAULT_BINARY
-from .core import TASKS, IMPLEMENTED
+from .core import TASKS, IMPLEMENTED, supported_languages
 
 PLAN_FIELDS={'schema_version','seed','scored_execution_qualified','cells'}
 CELL_FIELDS={'task','language','tests','model','effort','replicate','block_id','semantic_seed',
@@ -26,6 +26,8 @@ def validate_plan(plan,limit=None):
         for field,allowed in (('task',TASKS),('language',IMPLEMENTED),('tests',('T0','T1')),
                               ('model',MODELS),('effort',('low','medium','high'))):
             if not isinstance(cell[field],str) or cell[field] not in allowed:raise ValueError('invalid cell '+field)
+        if cell['language'] not in supported_languages(cell['task']):
+            raise ValueError('unsupported task language')
         for field in ('replicate','base_seconds','continuation_seconds'):
             if type(cell[field]) is not int or cell[field]<=0:raise ValueError('invalid cell '+field)
         if type(cell['semantic_seed']) is not int or cell['semantic_seed']<0:raise ValueError('invalid semantic seed')

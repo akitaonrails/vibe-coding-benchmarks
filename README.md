@@ -1,6 +1,6 @@
 # Languages benchmark
 
-A controlled experiment on how programming-language checks and supplied tests affect AI coding correctness and effort. The planned roster is Rust, Haskell, C#, Kotlin, TypeScript, Python and Ruby. **The first executable slice is Ruby and Rust**, as requested.
+A controlled experiment on how programming-language checks and supplied tests affect AI coding correctness and effort. The ledger task supports Rust, Haskell, C#, Kotlin, TypeScript, Python and Ruby. The original Ruby/Rust smoke controls remain separate.
 
 Read [the research and protocol](docs/README.md) for the hypotheses, experimental controls and analysis limits. Crash-store recovery and protocol migration are compact smoke controls. The larger ledger-engine task is a calibration candidate; none is established as a frontier benchmark. See [the size and difficulty audit](docs/difficulty-audit.md).
 
@@ -32,7 +32,34 @@ python3 -m langbench selftest
 
 A starter intentionally does not implement all requested behavior, so its grade should fail. `selftest` grades the known-good references; it measures the grader/environment, not model capability. Real candidate execution must use the isolated backend. Results directories and scratch work are ignored by Git.
 
-## Live subscription smoke tests
+## Seven-language effort matrix
+
+The new subscription track uses Kimi K3 and OpenCode/GLM 5.3, T0/T1 and two
+repetitions: 56 fresh ledger attempts. All languages use one pinned offline image.
+At most two short nudges are permitted after an explicit incomplete handoff;
+completed attempts are not reopened to equalize work. Initial results, actual
+nudges, request-level tokens, observed repair cycles, setup/grading time and
+operator interventions remain separate. Unknown human repair time stays unknown.
+
+Read [the effort protocol](docs/matrix-effort-protocol.md),
+[native runtime evidence](docs/seven-language-implementation.md) and
+[subscription adapter evidence](docs/subscription-implementation.md).
+One ledger task remains exploratory rather than a general language ranking.
+
+```sh
+python3 -m langbench selftest --runtime seven
+python3 -m langbench matrix-plan > .work/subscription-plan.json
+# Requires passed, current external subscription qualification receipts:
+python3 -m langbench matrix-run .work/subscription-plan.json results/subscription-matrix --kimi-qualification results/subscription-qualification-kimi-final/qualification.json --opencode-qualification results/subscription-qualification-opencode-final/qualification.json
+python3 -m langbench effort-report results/subscription-matrix
+```
+
+The runner freezes inputs before inference, preserves every consumed attempt and
+records unrun/quota cells. Resume verifies the frozen inputs and never silently
+retries a consumed cell. Later Opus/Sol collection is conditional on their quota
+and exact model availability after the initial subscription matrix.
+
+## Historical Codex subscription smoke tests
 
 The implemented adapter pins Codex app-server 0.156.0 and records hashes of both
 its binary and Code Mode companion. It requires an existing ChatGPT subscription
@@ -77,7 +104,7 @@ has been launched. See the implementation document before selecting larger runs.
 A separate real RabbitMQ experiment compares Elixir/OTP/Broadway, Rust/Tokio/Lapin,
 Rails/Bunny and a plain Ruby/Bunny control. It tests bounded concurrency, durable
 completion, lost responses, poison messages, process/broker recovery and shutdown.
-Read [the design](docs/scalability-benchmark.md) and
+Further discriminating pressure is planned in [the pressure research](docs/queue-pressure-research.md). Read [the design](docs/scalability-benchmark.md) and
 [implementation status](docs/scalability-implementation.md), and
 [sustained workload evidence](docs/scalability-load-validation.md). These reference
 qualifications do not establish AI coding effort or sustainable capacity.
@@ -103,6 +130,6 @@ References and private cases are controller-side assets. Never mount this reposi
 
 ## Interpretation
 
-Compilation success is not behavioral success. Token totals remain unknown when event scope or reasoning-token overlap has not been qualified. An unattended result is preserved before fixed generic nudges; every continuation contributes to reported effort. Private outcomes must never determine when a nudge is sent.
+Compilation success is not behavioral success. Token totals remain unknown when event scope or reasoning-token overlap has not been qualified. An initial result is preserved before any eligible nudges; every continuation contributes to reported effort. Private outcomes must never determine when a nudge is sent.
 
 Reference results, synthetic event tests and small live smoke tests serve different purposes. None alone establishes that one language is better or that a supplied suite substitutes for static checking. Full scored collection remains subject to the preregistration and qualification gates in the research plan.

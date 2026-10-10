@@ -1,0 +1,99 @@
+{
+  "kind": "typed_native_ledger_development_validation",
+  "date": "2026-10-10",
+  "not_model_attempts": true,
+  "source_hashes": {
+    "starters/csharp": {
+      ".gitignore": "bcabac78e966673105e8a8d935908f7d104475273cdbd9c989a681f0a702740f",
+      "Directory.Build.props": "8f27022c7ea7131077480c9c065b350dcb4fb8a8fc90b22edf2a87998730804f",
+      "Ledger.csproj": "bb32897a3fb1378291ec04b9b14e2c686fbe7dcc42ebd8742aad200a47c16f25",
+      "NuGet.Config": "9508cae5f76364f56e80eb97cb16493977243cf38e5cca6284e3d74f83b20a2c",
+      "build.sh": "daeefc5d80161e9f976bc125746e5f227679bb803a9bcf980db79f5a321abc10",
+      "run.sh": "f8503c2f7bbe65553013e50f1000b636aad12a71dce7e64a9a150170f6345a30",
+      "src/Device.cs": "4095db48d36a6d9c257324d0b314b2220deb58b7ae04681b059f814cafe20b36",
+      "src/Domain.cs": "9e6066aae06c99c02de31128ff91d4e7681e1d23dcd71374ec96682c6cc18176",
+      "src/Engine.cs": "e010bb62f170dd5ae6fc5796db467058fc901219a6edcdbd4f437890698c8ce2",
+      "src/Main.cs": "dabbf992ac03f00f0e4d985ae834dcd46605081cf77faca6c7323e687a6b03d2",
+      "src/Table.cs": "77707782aba969772e57fa9abc7fc3d794dc4f33dfcb70a64c03480ef1395ad8",
+      "src/Transaction.cs": "e093f21987b4c690ccd7288126b1464834f8855b82d1f861e10e0d8619423f20"
+    },
+    "references/csharp": {
+      ".gitignore": "bcabac78e966673105e8a8d935908f7d104475273cdbd9c989a681f0a702740f",
+      "Directory.Build.props": "8f27022c7ea7131077480c9c065b350dcb4fb8a8fc90b22edf2a87998730804f",
+      "Ledger.csproj": "bb32897a3fb1378291ec04b9b14e2c686fbe7dcc42ebd8742aad200a47c16f25",
+      "NuGet.Config": "9508cae5f76364f56e80eb97cb16493977243cf38e5cca6284e3d74f83b20a2c",
+      "build.sh": "daeefc5d80161e9f976bc125746e5f227679bb803a9bcf980db79f5a321abc10",
+      "run.sh": "f8503c2f7bbe65553013e50f1000b636aad12a71dce7e64a9a150170f6345a30",
+      "src/Device.cs": "267f40d6b700cc9ca23e180942f809adf73dc01c5b4a7b3fff56f61bd823cd30",
+      "src/Domain.cs": "9e6066aae06c99c02de31128ff91d4e7681e1d23dcd71374ec96682c6cc18176",
+      "src/Engine.cs": "709ac9aeadcf19558d28133fcaa38761c9715f9999b3c12c1332379363682c6f",
+      "src/Main.cs": "dabbf992ac03f00f0e4d985ae834dcd46605081cf77faca6c7323e687a6b03d2",
+      "src/Table.cs": "61114e1f74084bb5507a3fc4b1c6b1aaf3311b910d378ad850e6eee4cacfe638",
+      "src/Transaction.cs": "8a959d2c112f89a438d0f3f0f1a1d39555307e940750c75e85266524e687ef1f"
+    },
+    "starters/kotlin": {
+      ".gitignore": "b53ee26e6ff1da219b0563333a76d2c9ec19eec713d6ee54e11a1edacb0e9f3d",
+      "build.sh": "f91c2b59753445c47cc49a69afaceb72356dd0d1eed069a89f8ef0b24303b4de",
+      "run.sh": "34a7d63022eae1c57a21bb50e7ba527f3df16d0732b69e28f5b6d6138fd1fd29",
+      "src/Device.kt": "b775c7ef15303d41a813ebbbc9788ca84ce3ad73ceb04ee67610827c657e8902",
+      "src/Domain.kt": "b717c338b0e5f75aa5058271c3f970123bcac8a5f0bc57f41bd307729182f212",
+      "src/Engine.kt": "593eca939d07497d43340d58ea15c2e0f107b101ee1bfa9ddb60eb8466bb17d8",
+      "src/Main.kt": "eb607e0ae1e02ad41555f49c5f713fda31c87cd6282b2905e0624d9d53f69812",
+      "src/Table.kt": "cb912f4aef1bc8386ffcf41019edb78018a349a126dfb79fb1b609da711df0d3",
+      "src/Transaction.kt": "c2c61e685f422e9cce0874ce8980566fa135e785620ded894ee380505e351b7f"
+    },
+    "references/kotlin": {
+      ".gitignore": "b53ee26e6ff1da219b0563333a76d2c9ec19eec713d6ee54e11a1edacb0e9f3d",
+      "build.sh": "f91c2b59753445c47cc49a69afaceb72356dd0d1eed069a89f8ef0b24303b4de",
+      "run.sh": "34a7d63022eae1c57a21bb50e7ba527f3df16d0732b69e28f5b6d6138fd1fd29",
+      "src/Device.kt": "b243195ff6d2e1e30ffad2733ad3037f5a88d654774c681712120b4480deebf1",
+      "src/Domain.kt": "b717c338b0e5f75aa5058271c3f970123bcac8a5f0bc57f41bd307729182f212",
+      "src/Engine.kt": "02fbe03bf10ab8498375d24192154bb115a8bc4aaa954f6cb739d81b5fdc5e16",
+      "src/Main.kt": "eb607e0ae1e02ad41555f49c5f713fda31c87cd6282b2905e0624d9d53f69812",
+      "src/Table.kt": "8e35affd6358a20019957ac67e68bd73afaaf6112a6fe359903dc8ebebcc8044",
+      "src/Transaction.kt": "2965b88984d22ced738fb195721df1690d546974dfab6ca3ce493525690570c8"
+    }
+  },
+  "command": "python3 -m unittest tests.test_ledger_csharp tests.test_ledger_kotlin -q",
+  "tests": 6,
+  "seconds": 77.277,
+  "passed": true,
+  "runtime": {
+    "schema_version": 1,
+    "image": "sha256:62379d1caa1fe6d335b8a74a85b1dea2673dae39303df407edd296db1993db69",
+    "packages_sha256": "1665dce2a6ff063ecea33320035f8ecbfdbcee6ba281fe338892a9747dd2eb30",
+    "gson_version": "2.11.0",
+    "gson_sha256": "57928d6e5a6edeb2abd3770a8f95ba44dce45f3b23b7a9dc2b309c581552a78b"
+  },
+  "resources": {
+    "cpu": 2,
+    "memory_bytes": 4294967296,
+    "pids": 64,
+    "workspace_bytes": 536870912,
+    "tmp_bytes": 67108864
+  },
+  "per_language": {
+    "public_histories": 27,
+    "private_histories_including_public": 43,
+    "private_seeds": [
+      0,
+      29,
+      271
+    ],
+    "baseline_histories": 4,
+    "additional_guard_history": 1,
+    "compiled_mutants_detected": [
+      "omitted_conflict",
+      "omitted_uniqueness",
+      "omitted_receipt_reuse",
+      "early_checkpoint_publish",
+      "ignored_torn_frame",
+      "lost_tombstone_version"
+    ]
+  },
+  "limitations": [
+    "Independent port review and installed-wheel qualification are separate gates.",
+    "Single ledger instance remains difficulty-unqualified.",
+    "These are implementation validation results, not model effort observations."
+  ]
+}

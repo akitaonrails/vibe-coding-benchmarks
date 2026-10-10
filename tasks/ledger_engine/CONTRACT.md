@@ -1,6 +1,9 @@
 # Transactional ledger maintenance task, version 2
 
-Implement this complete contract in the supplied native service. The supplied v1
+Implement this complete contract in the supplied native language. Keep ledger
+business logic in that language; do not delegate it to another interpreter or
+external program. Standard libraries and the supplied dependencies are allowed.
+The supplied v1
 baseline is functioning, but lacks scoped identities, serializable validation,
 unique-index validation, fault-safe journal recovery and durable retry tracking.
 Only `src/**` is submitted. The JSONL adapter reads one object and emits one object

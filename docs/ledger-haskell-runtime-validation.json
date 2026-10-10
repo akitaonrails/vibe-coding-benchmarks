@@ -1,0 +1,73 @@
+{
+  "kind": "native_reference_development_validation",
+  "controlled_coding_trial": false,
+  "runtime": {
+    "schema_version": 1,
+    "image": "sha256:62379d1caa1fe6d335b8a74a85b1dea2673dae39303df407edd296db1993db69",
+    "packages_sha256": "1665dce2a6ff063ecea33320035f8ecbfdbcee6ba281fe338892a9747dd2eb30",
+    "gson_version": "2.11.0",
+    "gson_sha256": "57928d6e5a6edeb2abd3770a8f95ba44dce45f3b23b7a9dc2b309c581552a78b"
+  },
+  "haskell": {
+    "private_seeds": [
+      29,
+      271
+    ],
+    "private_histories_per_seed": 43,
+    "public_histories": 27,
+    "starter_histories": 4,
+    "baseline_guards": [
+      "unsupported_fault",
+      "unsupported_version"
+    ],
+    "compiled_mutants_rejected": [
+      "skip_conflicts",
+      "skip_unique",
+      "skip_receipt_dedup",
+      "publish_checkpoint_early",
+      "ignore_torn_frame",
+      "forget_tombstone_version"
+    ],
+    "test_methods": 3,
+    "elapsed_test_seconds": 62.33
+  },
+  "shared_runtime": {
+    "boundary_tests": 3,
+    "historical_worker_regressions": 9,
+    "installed_wheel_tests": 1
+  },
+  "ruby_rust_requalification": {
+    "languages": [
+      "ruby",
+      "rust"
+    ],
+    "private_seed": 29,
+    "private_histories_each": 43,
+    "public_histories_each": 27,
+    "starter_histories_each": 4
+  },
+  "sources": {
+    "starters": {
+      "tasks/ledger_engine/starters/haskell/.gitignore": "b53ee26e6ff1da219b0563333a76d2c9ec19eec713d6ee54e11a1edacb0e9f3d",
+      "tasks/ledger_engine/starters/haskell/build.sh": "2c47cfc7a2fdf1b553d45aa5ec154b9397917df2ee5ea83a0c15782dedb72efd",
+      "tasks/ledger_engine/starters/haskell/run.sh": "eba5f7c0a8f82cbc10559393c5fa6d0e6a79decc1085ac093ba7cfdc0c219a68",
+      "tasks/ledger_engine/starters/haskell/src/Device.hs": "5e321fa828c13e2919dc0fb9af999d98da93d13c12dc875b6719ed12ac65c377",
+      "tasks/ledger_engine/starters/haskell/src/Domain.hs": "46ac72fd52bb7fffb6663d03d061f8022c2a727810aeba58a488df9609d13f14",
+      "tasks/ledger_engine/starters/haskell/src/Engine.hs": "1f7f79a1cc6680266876dab5e25347dcba336e6d3be1e321f1da8134c88fe216",
+      "tasks/ledger_engine/starters/haskell/src/Main.hs": "6e5c40fe408fbb3312aec6272ce2a027f1024debb1d3fc97b25c1f47826885d7",
+      "tasks/ledger_engine/starters/haskell/src/Table.hs": "5ddc220d328ee1e9ca0fa68f5ee206e57a0a97aa502dd9dd2c0291137225d6f6",
+      "tasks/ledger_engine/starters/haskell/src/Transaction.hs": "3607f12536210f52520e583ad338a9b9fdcdb0d927a8dec953d701ef5bd74231"
+    },
+    "references": {
+      "tasks/ledger_engine/references/haskell/.gitignore": "b53ee26e6ff1da219b0563333a76d2c9ec19eec713d6ee54e11a1edacb0e9f3d",
+      "tasks/ledger_engine/references/haskell/build.sh": "2c47cfc7a2fdf1b553d45aa5ec154b9397917df2ee5ea83a0c15782dedb72efd",
+      "tasks/ledger_engine/references/haskell/run.sh": "eba5f7c0a8f82cbc10559393c5fa6d0e6a79decc1085ac093ba7cfdc0c219a68",
+      "tasks/ledger_engine/references/haskell/src/Device.hs": "0c50b1998703fa6ac338caac1e49105961daf6b482879f8e482f45e58dd1dc7a",
+      "tasks/ledger_engine/references/haskell/src/Domain.hs": "46ac72fd52bb7fffb6663d03d061f8022c2a727810aeba58a488df9609d13f14",
+      "tasks/ledger_engine/references/haskell/src/Engine.hs": "b8c7f812080dd2c1bba251f8b5e0fa1b93f15b0f135c8f12bad425872ac46329",
+      "tasks/ledger_engine/references/haskell/src/Main.hs": "6e5c40fe408fbb3312aec6272ce2a027f1024debb1d3fc97b25c1f47826885d7",
+      "tasks/ledger_engine/references/haskell/src/Table.hs": "50c8369ea8c7465263680fb243b424fa2b3da0ba6e6f6b58be2ca83400ec6d9b",
+      "tasks/ledger_engine/references/haskell/src/Transaction.hs": "0cc60849fca2f89b1f8e4c7ef5651d4c928a8bb581c11a3d5180a0911c16de5d"
+    }
+  }
+}

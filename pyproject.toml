@@ -21,7 +21,7 @@ langbench_tasks = "tasks"
 langbench_config = "configs"
 
 [tool.setuptools.package-data]
-langbench_tasks = ["*/CONTRACT.md", "*/VALIDATION.md", "*/task.json", "*/cases.py", "*/starters/*/*.sh", "*/starters/*/Cargo.*", "*/starters/*/README.md", "*/starters/*/src/*", "*/references/*/*.sh", "*/references/*/Cargo.*", "*/references/*/src/*"]
+langbench_tasks = ["*/CONTRACT.md", "*/VALIDATION.md", "*/task.json", "*/cases.py", "*/starters/*/*.sh", "*/starters/*/Cargo.*", "*/starters/*/README.md", "*/starters/*/src/*", "*/starters/*/src/**/*", "*/starters/*/*.csproj", "*/starters/*/*.props", "*/starters/*/NuGet.Config", "*/starters/*/tsconfig.json", "*/starters/*/runtime.d.ts", "*/references/*/*.sh", "*/references/*/Cargo.*", "*/references/*/src/*", "*/references/*/src/**/*", "*/references/*/*.csproj", "*/references/*/*.props", "*/references/*/NuGet.Config", "*/references/*/tsconfig.json", "*/references/*/runtime.d.ts"]
 langbench_config = ["*.json"]
 scalability = ["CONTRACT.md", "requirements.txt", "infra/*.py", "infra/Dockerfile"]
 

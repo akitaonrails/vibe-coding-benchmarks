@@ -23,3 +23,10 @@ The main comparison is tests supplied versus no tests supplied. Both use an inde
 The reference project at `~/Projects/llm-coding-benchmark` was inspected read-only. Its existing task results inform difficulty selection, not the findings of this new experiment. No personal Ruby/Rust stack preference was applied: choosing a preferred implementation language would bias this project.
 
 A separate [queue scalability and reliability track](scalability-benchmark.md) tests Elixir/OTP/Broadway, Rust with libraries and Rails/Bunny. Its implemented runtime runner exercises backpressure and failure using real RabbitMQ, native workers and an independent durable sink. Agent-effort integration and capacity qualification remain separate gates; see [implementation and validation](scalability-implementation.md) and [larger workload evidence](scalability-load-validation.md). This compares ecosystems and does not extend the typing experiment into a claim about Elixir's type system.
+
+## Current subscription expansion
+
+- [Coding effort and intervention protocol](matrix-effort-protocol.md)
+- [Subscription adapter design](subscription-adapters.md) and [implementation evidence](subscription-implementation.md)
+- [Seven-language expansion](seven-language-expansion.md) and [runtime validation](seven-language-implementation.md)
+- [Further queue pressure research](queue-pressure-research.md)

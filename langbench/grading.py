@@ -44,7 +44,7 @@ def sandbox_command(command, workspace):
     argv += ['--setenv', 'PATH', ':'.join(path_parts), '--bind', str(workspace), '/workspace', '--chdir', '/workspace', '--']
     return argv + command
 
-def grade(task, language, source, suite='private', seed=0, backend='docker'):
+def grade(task, language, source, suite='private', seed=0, backend='docker', runtime='historical'):
     if backend not in ('docker', 'sandbox', 'trusted-reference'):
         raise ValueError('unknown grading backend')
     src = validate_source(source)
@@ -57,7 +57,7 @@ def grade(task, language, source, suite='private', seed=0, backend='docker'):
         copy_workspace(scaffold(task, language), workspace)
         shutil.rmtree(workspace / 'src')
         shutil.copytree(src, workspace / 'src')
-        worker=stack.enter_context(DockerWorker(workspace)) if backend == 'docker' else None
+        worker=stack.enter_context(DockerWorker(workspace,runtime=runtime)) if backend == 'docker' else None
         def run(command, stdin='', timeout=10):
             if worker is not None:
                 return worker.execute(command,stdin=stdin,timeout=timeout)

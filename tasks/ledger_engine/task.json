@@ -4,8 +4,13 @@
   "version": 1,
   "stage": "development",
   "languages": [
-    "ruby",
-    "rust"
+    "rust",
+    "haskell",
+    "csharp",
+    "kotlin",
+    "typescript",
+    "python",
+    "ruby"
   ],
   "editable_paths": [
     "src/**"

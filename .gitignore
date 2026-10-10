@@ -10,3 +10,5 @@ scalability/workers/**/_build/
 scalability/workers/**/deps/
 scalability/workers/**/vendor/
 scalability/workers/**/.bundle/
+
+.runtime-build/

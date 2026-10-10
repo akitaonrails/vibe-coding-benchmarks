@@ -126,3 +126,25 @@ be labeled conditional and cannot replace the all-attempt comparison.
 Maintain two separate conclusions: which configured languages performed better
 on this task, and what extra operator assistance was actually necessary. Neither
 requires equal iteration counts or an assumed ranking of type-system strength.
+
+## Instrumentation entry points
+
+The new implementation is separate from the historical fixed-nudge runner:
+
+- `python -m langbench matrix-plan` emits the complete 56-cell draft. Freeze it
+  only after all language and subscription qualifications pass.
+- `python -m langbench matrix-run PLAN OUTPUT --kimi-qualification FILE
+  --opencode-qualification FILE` runs sequentially, recording each started cell
+  before inference. `--resume` verifies frozen inputs and does not rerun a consumed
+  or interrupted cell. A quota stop blocks that provider's remaining cells;
+  infrastructure incidents stop collection for investigation.
+- `python -m langbench effort-report OUTPUT` retains every planned cell and its
+  missing/invalid state. The report distinguishes initial and final correctness,
+  records actual interventions, and exposes raw usage provenance.
+
+The observable-cycle classifier is a conservative trace aid, not a complete shell
+parser. It identifies recognized checks, source-changing calls, and a subsequent
+check. A preceding failed check makes that sequence an observed repair cycle.
+Unrecognized commands and absent source evidence remain explicit. Counts are
+lower bounds and must be checked against retained traces before interpretation.
+These entry points do not by themselves establish live adapter qualification.

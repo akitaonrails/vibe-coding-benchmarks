@@ -10,7 +10,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
 LANGUAGES = ('rust', 'haskell', 'csharp', 'kotlin', 'typescript', 'python', 'ruby')
-IMPLEMENTED = ('ruby', 'rust')
+IMPLEMENTED = LANGUAGES
 TASKS = ('crash_store', 'protocol_migration', 'ledger_engine')
 
 def task_path(task):
@@ -67,8 +67,11 @@ def cases(task, suite, seed=0):
     spec.loader.exec_module(module)
     return module.cases(suite, seed=seed)
 
+def supported_languages(task):
+    return tuple(json.loads((task_path(task)/'task.json').read_text())['languages'])
+
 def scaffold(task, language, kind='starter'):
-    if language not in IMPLEMENTED or kind not in ('starter', 'reference'):
+    if language not in supported_languages(task) or kind not in ('starter', 'reference'):
         raise ValueError('unsupported language or scaffold')
     return task_path(task) / {'starter':'starters','reference':'references'}[kind] / language
 

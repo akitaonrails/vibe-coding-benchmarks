@@ -1,0 +1,185 @@
+{
+  "kind": "native_port_development_validation",
+  "date": "2026-10-10",
+  "not_model_attempts": true,
+  "source_hashes": {
+    "starters/python": {
+      "build.sh": "e7072967b34681a16523e38b7d786f924c0ca892d2d4f23f17acc678853a5edc",
+      "run.sh": "34b9fd37f7ada5e15217a5bff31710cb4bd91654eaccacbf25f8a96a46266a9b",
+      "src/device.py": "382947098d5896faec206f18b5ccf546d8d77486a113268125e01fa85cef5cc3",
+      "src/domain.py": "eb4883524cc9913fa01bcd2670718e0057ade8cd617aac616d3ee6e4206fba13",
+      "src/main.py": "8a6efa1c56cf9ac8711f3911fe51af527c5c8016f45c3d6f801b39d29e35a5dc",
+      "src/solution.py": "293181a448ff1e4d974179cbb5346174af6d35f7cf2fd7186f8782dd2a322da8",
+      "src/table.py": "c41110bb951df552567b42844ba414d614fb52c2256421ce0f44cd4b971a0e28",
+      "src/transaction.py": "2a47ac0ba7d60ff713bb131d9b7ef6753b40f1acd4a2f23e7333301d2953aeb9"
+    },
+    "references/python": {
+      "build.sh": "e7072967b34681a16523e38b7d786f924c0ca892d2d4f23f17acc678853a5edc",
+      "run.sh": "34b9fd37f7ada5e15217a5bff31710cb4bd91654eaccacbf25f8a96a46266a9b",
+      "src/device.py": "11428f881e476f0b75922b512dec93c2c243ad8fb6ddf7d76796feadd46c9c29",
+      "src/domain.py": "eb4883524cc9913fa01bcd2670718e0057ade8cd617aac616d3ee6e4206fba13",
+      "src/main.py": "8a6efa1c56cf9ac8711f3911fe51af527c5c8016f45c3d6f801b39d29e35a5dc",
+      "src/solution.py": "c66ef6bbfe1759cd40f984feec5087705463dd5fc4ce836a022f9003d4f592a6",
+      "src/table.py": "f129d87f7e8d1f3f65f45ca709654a711a01b9514d7738a50918d114184a8772",
+      "src/transaction.py": "5b2749d4c8ab077d42042cab2f2d284d8431a334fcd31b8f765a174da7f2960e"
+    },
+    "starters/typescript": {
+      "build.sh": "3d6c100450b62990d2ded3614f92ab4c84746a0c6c16d091899144319409a93b",
+      "run.sh": "32cde89a53f029d25021ce6ce4297f2e0a41e81c766898d5195b46c42272fca7",
+      "runtime.d.ts": "065f5798846c8d5736a2d4bdea1e47787a72e80e39841e6a20281ec7a900b1a8",
+      "src/device.ts": "f9f6c072a1d3593876fc3b3b12bffb9a70efc95b054aa1f997b7600a0cc4643d",
+      "src/domain.ts": "a9936be02faa217a52d50742cd563f229d8fef3789ca1ba56ce00545627a7def",
+      "src/main.ts": "8c0b0ad28f5569d5aafebafdbdf1aa0e0c9f03159da9dc89e14abc7ebb5958f5",
+      "src/solution.ts": "6d040de2e671ff77ec674b1b7e098182d639a8941af51b18b1cb4b4fd0d8e7d1",
+      "src/table.ts": "399459f49d34686e33d8aeb89fba5381e5327664936794fd80b0f426c7f24588",
+      "src/transaction.ts": "e80431e970aa5340975adcea4ba6238c82771393fc2efdd124d99698caec351a",
+      "tsconfig.json": "1380beffb94c97ee80c47d7ac63cb493f8e8bc2bedfeaa72fd14c1aa91d59bab"
+    },
+    "references/typescript": {
+      "build.sh": "3d6c100450b62990d2ded3614f92ab4c84746a0c6c16d091899144319409a93b",
+      "run.sh": "32cde89a53f029d25021ce6ce4297f2e0a41e81c766898d5195b46c42272fca7",
+      "runtime.d.ts": "065f5798846c8d5736a2d4bdea1e47787a72e80e39841e6a20281ec7a900b1a8",
+      "src/device.ts": "ea1542395706a9bd540d9efcf3427a220657fc48ddf76c7d128f13e1682bfe79",
+      "src/domain.ts": "a9936be02faa217a52d50742cd563f229d8fef3789ca1ba56ce00545627a7def",
+      "src/main.ts": "8c0b0ad28f5569d5aafebafdbdf1aa0e0c9f03159da9dc89e14abc7ebb5958f5",
+      "src/solution.ts": "db87377221891d3f87f4949844741078b5db28864dff0017bbd089f9c2929e58",
+      "src/table.ts": "a4b6a568ee326586b0dc12ae5f43e213662f473f5d5444e152a2d3d0fd6f8ec2",
+      "src/transaction.ts": "910c5bca28e3db843a1cd217ef241266b20a59fa3e44c912221929902795edf9",
+      "tsconfig.json": "1380beffb94c97ee80c47d7ac63cb493f8e8bc2bedfeaa72fd14c1aa91d59bab"
+    }
+  },
+  "reference_suites": {
+    "public": 27,
+    "private_including_public": 43,
+    "seeds": [
+      0,
+      29,
+      271
+    ]
+  },
+  "starter_histories": 4,
+  "actual_native_mutants_per_language": [
+    "skip_conflict",
+    "skip_unique",
+    "skip_receipt",
+    "early_checkpoint",
+    "ignore_torn",
+    "drop_tombstone_version"
+  ],
+  "test_command": "python3 -m unittest tests.test_ledger_python tests.test_ledger_typescript -q",
+  "test_count": 12,
+  "passed": true,
+  "seconds": 10.943,
+  "toolchains": {
+    "python_host": "3.12.12",
+    "python_worker_candidate": "/usr/bin/python3 3.14.7",
+    "node": "26.10.0",
+    "typescript": "6.0.3"
+  },
+  "isolated_docker_qualification": [
+    {
+      "language": "python",
+      "kind": "references",
+      "passed": true,
+      "cases": {
+        "public": 27,
+        "private_seed_0": 43,
+        "private_seed_29": 43,
+        "private_seed_271": 43
+      },
+      "worker": {
+        "memory.max": "4294967296",
+        "memory.swap.max": "0",
+        "pids.max": "64",
+        "cpu.max": "200000 100000",
+        "controller_assets_visible": false,
+        "network_blocked": true,
+        "runtime": "seven",
+        "image": "sha256:62379d1caa1fe6d335b8a74a85b1dea2673dae39303df407edd296db1993db69",
+        "workspace_bytes": 536870912,
+        "tmp_bytes": 67108864,
+        "cargo_bytes": 134217728,
+        "packages_sha256": "1665dce2a6ff063ecea33320035f8ecbfdbcee6ba281fe338892a9747dd2eb30"
+      },
+      "seconds": 4.76717891683802
+    },
+    {
+      "language": "python",
+      "kind": "starters",
+      "passed": true,
+      "cases": {
+        "baseline": 4
+      },
+      "worker": {
+        "memory.max": "4294967296",
+        "memory.swap.max": "0",
+        "pids.max": "64",
+        "cpu.max": "200000 100000",
+        "controller_assets_visible": false,
+        "network_blocked": true,
+        "runtime": "seven",
+        "image": "sha256:62379d1caa1fe6d335b8a74a85b1dea2673dae39303df407edd296db1993db69",
+        "workspace_bytes": 536870912,
+        "tmp_bytes": 67108864,
+        "cargo_bytes": 134217728,
+        "packages_sha256": "1665dce2a6ff063ecea33320035f8ecbfdbcee6ba281fe338892a9747dd2eb30"
+      },
+      "seconds": 0.7739631568547338
+    },
+    {
+      "language": "typescript",
+      "kind": "references",
+      "passed": true,
+      "cases": {
+        "public": 27,
+        "private_seed_0": 43,
+        "private_seed_29": 43,
+        "private_seed_271": 43
+      },
+      "worker": {
+        "memory.max": "4294967296",
+        "memory.swap.max": "0",
+        "pids.max": "64",
+        "cpu.max": "200000 100000",
+        "controller_assets_visible": false,
+        "network_blocked": true,
+        "runtime": "seven",
+        "image": "sha256:62379d1caa1fe6d335b8a74a85b1dea2673dae39303df407edd296db1993db69",
+        "workspace_bytes": 536870912,
+        "tmp_bytes": 67108864,
+        "cargo_bytes": 134217728,
+        "packages_sha256": "1665dce2a6ff063ecea33320035f8ecbfdbcee6ba281fe338892a9747dd2eb30"
+      },
+      "seconds": 5.473983597010374
+    },
+    {
+      "language": "typescript",
+      "kind": "starters",
+      "passed": true,
+      "cases": {
+        "baseline": 4
+      },
+      "worker": {
+        "memory.max": "4294967296",
+        "memory.swap.max": "0",
+        "pids.max": "64",
+        "cpu.max": "200000 100000",
+        "controller_assets_visible": false,
+        "network_blocked": true,
+        "runtime": "seven",
+        "image": "sha256:62379d1caa1fe6d335b8a74a85b1dea2673dae39303df407edd296db1993db69",
+        "workspace_bytes": 536870912,
+        "tmp_bytes": 67108864,
+        "cargo_bytes": 134217728,
+        "packages_sha256": "1665dce2a6ff063ecea33320035f8ecbfdbcee6ba281fe338892a9747dd2eb30"
+      },
+      "seconds": 1.004091784125194
+    }
+  ],
+  "python_worker_interpreter_validation": {
+    "command": "PATH=/usr/bin:/bin /usr/bin/python3 -m unittest tests.test_ledger_python -q",
+    "tests": 6,
+    "seconds": 5.393,
+    "passed": true
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "image": "sha256:62379d1caa1fe6d335b8a74a85b1dea2673dae39303df407edd296db1993db69",
+  "packages_sha256": "1665dce2a6ff063ecea33320035f8ecbfdbcee6ba281fe338892a9747dd2eb30",
+  "gson_version": "2.11.0",
+  "gson_sha256": "57928d6e5a6edeb2abd3770a8f95ba44dce45f3b23b7a9dc2b309c581552a78b"
+}

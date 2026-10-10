@@ -1,5 +1,6 @@
 """Build and exercise a wheel without importing the source checkout."""
 import json
+import hashlib
 import os
 from pathlib import Path
 import shutil
@@ -34,12 +35,26 @@ class PackagingTests(unittest.TestCase):
                 for asset in ('runner.py','CONTRACT.md','requirements.txt','infra/Dockerfile','infra/sink.py','infra/producer.py'):
                     self.assertIn('scalability/'+asset,paths)
                 self.assertFalse(any(p.startswith('scalability/workers/') for p in paths))
+                for language in ('haskell','csharp','kotlin','python','typescript'):
+                    self.assertTrue(any(p.startswith(f'langbench_tasks/ledger_engine/starters/{language}/src/') for p in paths))
+                    self.assertTrue(any(p.startswith(f'langbench_tasks/ledger_engine/references/{language}/src/') for p in paths))
+                for asset in ('csharp/Ledger.csproj','csharp/Directory.Build.props','csharp/NuGet.Config','typescript/tsconfig.json','typescript/runtime.d.ts'):
+                    self.assertIn('langbench_tasks/ledger_engine/starters/'+asset,paths)
+                self.assertIn('langbench_config/toolchain-seven.json',paths)
                 self.assertFalse(any('/target/' in p or '__pycache__' in p or p.endswith('.pyc') for p in paths))
             target = base / 'installed'
             installed = subprocess.run([sys.executable, '-m', 'pip', 'install', '--no-deps', '--no-index',
                                         '--target', str(target), str(wheel)], text=True, capture_output=True, timeout=60)
             self.assertEqual(installed.returncode, 0, installed.stderr)
             env = dict(os.environ, PYTHONPATH=str(target), PYTHONDONTWRITEBYTECODE='1')
+            binding = subprocess.run(
+                [sys.executable, '-c', 'import json; from langbench.subscriptions import runtime_binding; print(json.dumps(runtime_binding()))'],
+                cwd=base, env=env, text=True, capture_output=True, timeout=30)
+            self.assertEqual(binding.returncode, 0, binding.stderr)
+            self.assertEqual(json.loads(binding.stdout), {
+                'runtime': 'seven',
+                'toolchain_config_sha256': hashlib.sha256((ROOT/'configs/toolchain-seven.json').read_bytes()).hexdigest(),
+            })
             queue_help = subprocess.run([sys.executable, '-m', 'scalability.runner', '--help'], cwd=base,
                                         env=env, text=True, capture_output=True, timeout=30)
             self.assertEqual(queue_help.returncode,0,queue_help.stderr)
@@ -49,7 +64,7 @@ class PackagingTests(unittest.TestCase):
                                         env=env, text=True, capture_output=True, timeout=30)
                 self.assertEqual(result.returncode, 0, result.stderr)
                 return json.loads(result.stdout)
-            self.assertEqual(cli('list')['implemented_languages'], ['ruby', 'rust'])
+            self.assertEqual(set(cli('list')['implemented_languages']), {'rust','haskell','csharp','kotlin','typescript','python','ruby'})
             calibration = cli('plan', '--seed', '17')
             self.assertEqual(calibration['purpose'], 'calibration')
             self.assertEqual({c['task'] for c in calibration['cells']}, {'ledger_engine'})
@@ -76,3 +91,11 @@ class PackagingTests(unittest.TestCase):
                     self.assertTrue(os.access(workspace / 'run.sh', os.X_OK))
                     self.assertFalse((workspace / 'cases.py').exists())
                     self.assertFalse((workspace / 'references').exists())
+
+            for language in ('haskell','csharp','kotlin','python','typescript'):
+                workspace=base/f'ledger-{language}'
+                cli('prepare','ledger_engine',language,str(workspace),'--tests','T1')
+                self.assertTrue((workspace/'src').is_dir())
+                self.assertTrue((workspace/'test_public.py').is_file())
+                self.assertFalse((workspace/'cases.py').exists())
+                self.assertFalse((workspace/'references').exists())

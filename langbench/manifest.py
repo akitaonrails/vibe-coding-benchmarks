@@ -3,7 +3,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
-from .core import TASKS, IMPLEMENTED
+from .core import supported_languages, TASKS
 
 FIELDS = {'schema_version','attempt_id','task','language','tests','model','effort','replicate','block_id',
           'base_seconds','continuation_seconds','max_nudges','auth_mode','initial_artifact_sha256',
@@ -17,7 +17,7 @@ def validate(manifest):
     for field in ('attempt_id','block_id','model','environment_digest'):
         if not isinstance(manifest[field],str) or not manifest[field] or any(c in manifest[field] for c in '\r\n\0'):
             raise ValueError(f'invalid {field}')
-    if manifest['task'] not in TASKS or manifest['language'] not in IMPLEMENTED or manifest['tests'] not in ('T0','T1'):
+    if manifest['task'] not in TASKS or manifest['language'] not in supported_languages(manifest['task']) or manifest['tests'] not in ('T0','T1'):
         raise ValueError('invalid treatment')
     if type(manifest['semantic_seed']) is not int or manifest['semantic_seed'] < 0:
         raise ValueError('invalid semantic_seed')
