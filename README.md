@@ -2,7 +2,7 @@
 
 A controlled experiment on how programming-language checks and supplied tests affect AI coding correctness and effort. The planned roster is Rust, Haskell, C#, Kotlin, TypeScript, Python and Ruby. **The first executable slice is Ruby and Rust**, as requested.
 
-Read [the research and protocol](docs/README.md) for the hypotheses, experimental controls and analysis limits. Initial executable tasks are development instances of crash-store recovery and multi-module protocol migration; neither has yet been calibrated as a frontier-level benchmark.
+Read [the research and protocol](docs/README.md) for the hypotheses, experimental controls and analysis limits. Crash-store recovery and protocol migration are compact smoke controls. The larger ledger-engine task is a calibration candidate; none is established as a frontier benchmark. See [the size and difficulty audit](docs/difficulty-audit.md).
 
 ## Local development
 
@@ -51,8 +51,7 @@ python3 -m langbench report results/ruby-t1/result.json
 inference. All four bounded Ruby/Rust × T0/T1 smoke cells passed the 44-case F4 grading
 suite at their initial checkpoint and after both nudges; the suite includes 20
 public and 24 withheld cases. This is development qualification, not evidence for
-a language ranking. The 48-cell pilot is not launched. Its three-minute initial budget is a toolchain
-smoke budget, not the pilot's proposed 45 minutes. Two fixed generic nudges get
+a language ranking. The default six-cell ledger calibration and legacy 48-cell smoke plan have not been launched. The observed three-minute initial budget was a toolchain smoke budget. Two fixed generic nudges get
 separate snapshots. Request-level provider counts reconcile for these pinned traces (cached input
 included; not billing or invisible compute). Generic token accounting remains
 unqualified, and a worker timeout that
@@ -62,10 +61,11 @@ Execute a bounded prefix of a generated development plan:
 
 ```sh
 mkdir -p .work
-mkdir -p .work
-python3 -m langbench plan > .work/pilot-plan.json
-python3 -m langbench batch .work/pilot-plan.json results/pilot --limit 2
+python3 -m langbench plan > .work/calibration-plan.json
+python3 -m langbench batch .work/calibration-plan.json results/calibration --limit 2
 ```
+
+`plan` defaults to ledger-engine calibration. Use `plan --purpose smoke` for the legacy 48-cell control matrix. A single ledger instance cannot establish frontier difficulty.
 
 The prefix follows randomized plan order and need not contain paired cells. The
 runner validates and freezes the selected plan, records durable progress, and
@@ -77,6 +77,7 @@ has been launched. See the implementation document before selecting larger runs.
 - `langbench/`: bundle preparation, process supervision, grading, manifests, event accounting, fixed-nudge collection and descriptive reports.
 - `tasks/crash_store/`: logical page publication, durable snapshots, capacity pressure and interrupted reclamation.
 - `tasks/protocol_migration/`: working v1 service to migrate across wire/domain/repository/worker boundaries; scoped IDs, authorization, absent/null values, cancellation and retry generations.
+- `tasks/ledger_engine/`: snapshot transactions, conflict validation, durable journal replay and checkpoint migration; a difficulty calibration candidate.
 - `tests/`: oracle anchors, Ruby/Rust parity, semantic mutants and instrumentation/boundary tests.
 - `configs/`: pilot roster and execution budgets. A generated plan is not an instruction to launch the full matrix.
 - `docs/`: research, protocol, task designs, rollout and implementation evidence.

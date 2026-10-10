@@ -12,12 +12,14 @@ CELL_FIELDS={'task','language','tests','model','effort','replicate','block_id','
 MODELS={'gpt-6-astra','gpt-6-sol','gpt-6-luna'}
 
 def validate_plan(plan,limit=None):
-    if not isinstance(plan,dict) or set(plan)!=PLAN_FIELDS:raise ValueError('unknown or missing plan fields')
+    if not isinstance(plan,dict) or set(plan)-{'purpose'}!=PLAN_FIELDS:raise ValueError('unknown or missing plan fields')
     if type(plan['schema_version']) is not int or plan['schema_version']!=1:raise ValueError('unsupported plan schema')
     if type(plan['seed']) is not int or plan['seed']<0:raise ValueError('invalid randomization seed')
     if plan['scored_execution_qualified'] is not False:raise ValueError('batch supports unqualified development smoke plans only')
     if not isinstance(plan['cells'],list) or not plan['cells']:raise ValueError('plan requires cells')
     if limit is not None and (type(limit) is not int or limit<=0):raise ValueError('limit must be positive')
+    purpose=plan.get('purpose','smoke')
+    if purpose not in ('smoke','calibration'):raise ValueError('invalid plan purpose')
     selected=plan['cells'][:limit]
     for cell in selected:
         if not isinstance(cell,dict) or set(cell)!=CELL_FIELDS:raise ValueError('unknown or missing cell fields')
@@ -28,6 +30,8 @@ def validate_plan(plan,limit=None):
             if type(cell[field]) is not int or cell[field]<=0:raise ValueError('invalid cell '+field)
         if type(cell['semantic_seed']) is not int or cell['semantic_seed']<0:raise ValueError('invalid semantic seed')
         if type(cell['max_nudges']) is not int or cell['max_nudges']!=2:raise ValueError('main policy requires two nudges')
+        if purpose=='calibration' and cell['task'] in ('crash_store','protocol_migration'):
+            raise ValueError('smoke controls cannot be presented as calibration tasks')
         if cell['auth_mode']!='chatgpt':raise ValueError('subscription auth required')
         if not isinstance(cell['block_id'],str) or not cell['block_id'] or any(c in cell['block_id'] for c in '\r\n\0'):
             raise ValueError('invalid block ID')

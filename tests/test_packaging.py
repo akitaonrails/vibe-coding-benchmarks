@@ -43,10 +43,14 @@ class PackagingTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
                 return json.loads(result.stdout)
             self.assertEqual(cli('list')['implemented_languages'], ['ruby', 'rust'])
-            plan = cli('plan', '--seed', '17')
+            calibration = cli('plan', '--seed', '17')
+            self.assertEqual(calibration['purpose'], 'calibration')
+            self.assertEqual({c['task'] for c in calibration['cells']}, {'ledger_engine'})
+            self.assertFalse(calibration['scored_execution_qualified'])
+            plan = cli('plan', '--purpose', 'smoke', '--seed', '17')
             self.assertEqual(len(plan['cells']), 48)
             self.assertTrue(all(c['replicate'] in (1, 2) and c['block_id'] for c in plan['cells']))
-            self.assertEqual(plan, cli('plan', '--seed', '17'))
+            self.assertEqual(plan, cli('plan', '--purpose', 'smoke', '--seed', '17'))
             blocks = {}
             for cell in plan['cells']:
                 blocks.setdefault(cell['block_id'], []).append(cell)

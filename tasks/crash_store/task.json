@@ -20,5 +20,12 @@
     "src/**"
   ],
   "build_timeout_seconds": 120,
-  "case_timeout_seconds": 5
+  "case_timeout_seconds": 5,
+  "difficulty": {
+    "role": "smoke_control",
+    "calibration_required": true,
+    "comparison_eligible": false,
+    "independent_instance_id": "crash_store:v1",
+    "independence_reviewed": false
+  }
 }

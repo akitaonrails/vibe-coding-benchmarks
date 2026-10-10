@@ -33,5 +33,6 @@
   "scored_execution_qualified": false,
   "replicates": 2,
   "block_prefix": "development-pilot",
-  "semantic_seed_base": 20261010
+  "semantic_seed_base": 20261010,
+  "purpose": "smoke"
 }

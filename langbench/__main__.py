@@ -12,6 +12,8 @@ def main():
     sub.add_parser('list')
     p = sub.add_parser('plan')
     p.add_argument('--seed', type=int, default=20261010)
+    p.add_argument('--purpose', choices=('calibration','smoke'))
+    p.add_argument('--config', type=Path)
     p = sub.add_parser('prepare')
     p.add_argument('task', choices=TASKS)
     p.add_argument('language', choices=IMPLEMENTED)
@@ -52,16 +54,26 @@ def main():
     p.add_argument('destination', type=Path)
     p.add_argument('--limit', type=int)
     p.add_argument('--binary', type=Path, default=DEFAULT_BINARY)
+    p = sub.add_parser('size')
+    p.add_argument('task', choices=TASKS)
+    p.add_argument('language', choices=IMPLEMENTED)
+    p.add_argument('--result', type=Path)
+    p = sub.add_parser('calibration-report')
+    p.add_argument('results', type=Path, nargs='+')
     args = parser.parse_args()
     if args.command == 'list':
         result = {'languages':LANGUAGES, 'implemented_languages':IMPLEMENTED, 'tasks':TASKS}
     elif args.command == 'plan':
         import random
         from importlib.resources import files
-        config_path = Path(__file__).resolve().parent.parent / 'configs' / 'ruby-rust-pilot.json'
-        if not config_path.is_file():
-            config_path = files('langbench_config').joinpath('ruby-rust-pilot.json')
+        purpose=args.purpose or 'calibration'
+        filename='ruby-rust-pilot.json' if purpose=='smoke' else 'ledger-engine-calibration.json'
+        config_path=args.config or Path(__file__).resolve().parent.parent / 'configs' / filename
+        if args.config is None and not config_path.is_file():
+            config_path = files('langbench_config').joinpath(filename)
         config = json.loads(config_path.read_text())
+        purpose=config.get('purpose','smoke') if args.config is not None and args.purpose is None else purpose
+        if config.get('purpose',purpose)!=purpose:raise ValueError('config purpose differs from requested purpose')
         cells = []
         for replicate in range(1, config['replicates'] + 1):
             for task in config['tasks']:
@@ -77,7 +89,7 @@ def main():
                                           'continuation_seconds': config['continuation_seconds_each'],
                                           'max_nudges': config['max_nudges'], 'auth_mode': config['auth_mode']})
         random.Random(args.seed).shuffle(cells)
-        result = {'schema_version': 1, 'seed': args.seed,
+        result = {'schema_version': 1, 'seed': args.seed, 'purpose':purpose,
                   'scored_execution_qualified': config['scored_execution_qualified'], 'cells': cells}
     elif args.command == 'prepare':
         result = prepare(args.task,args.language,args.tests,args.destination)
@@ -97,6 +109,12 @@ def main():
     elif args.command == 'batch':
         from .batch import batch
         result = batch(args.plan,args.destination,limit=args.limit,binary=args.binary)
+    elif args.command == 'size':
+        from .size import measure
+        result = measure(args.task,args.language,args.result)
+    elif args.command == 'calibration-report':
+        from .difficulty import calibrate
+        result = calibrate([json.loads(path.read_text()) for path in args.results])
     else:
         result = summarize([json.loads(path.read_text()) for path in args.results])
     print(json.dumps(result, indent=2))

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "purpose": "calibration",
+  "languages": ["ruby", "rust"],
+  "tasks": ["ledger_engine"],
+  "test_conditions": ["T1"],
+  "models": [{"requested": "gpt-6-astra", "effort": "low"}],
+  "base_seconds": 900,
+  "continuation_seconds_each": 180,
+  "max_nudges": 2,
+  "auth_mode": "chatgpt",
+  "scored_execution_qualified": false,
+  "replicates": 3,
+  "block_prefix": "ledger-engine-calibration",
+  "semantic_seed_base": 20261010
+}

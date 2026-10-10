@@ -11,7 +11,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parent.parent
 LANGUAGES = ('rust', 'haskell', 'csharp', 'kotlin', 'typescript', 'python', 'ruby')
 IMPLEMENTED = ('ruby', 'rust')
-TASKS = ('crash_store', 'protocol_migration')
+TASKS = ('crash_store', 'protocol_migration', 'ledger_engine')
 
 def task_path(task):
     if task not in TASKS:

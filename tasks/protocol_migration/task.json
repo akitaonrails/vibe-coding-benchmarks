@@ -20,5 +20,12 @@
   "stage": "development",
   "editable_paths": [
     "src/**"
-  ]
+  ],
+  "difficulty": {
+    "role": "smoke_control",
+    "calibration_required": true,
+    "comparison_eligible": false,
+    "independent_instance_id": "protocol_migration:v1",
+    "independence_reviewed": false
+  }
 }

@@ -1,0 +1,39 @@
+{
+  "id": "ledger_engine",
+  "family": "integrated_transactions",
+  "version": 1,
+  "stage": "development",
+  "languages": [
+    "ruby",
+    "rust"
+  ],
+  "editable_paths": [
+    "src/**"
+  ],
+  "critical_groups": [
+    "compatibility",
+    "authorization",
+    "identity",
+    "snapshots",
+    "read_conflicts",
+    "write_conflicts",
+    "range_conflicts",
+    "index_conflicts",
+    "uniqueness",
+    "capacity",
+    "presence",
+    "retry",
+    "durability",
+    "migration",
+    "priority"
+  ],
+  "build_timeout_seconds": 120,
+  "case_timeout_seconds": 10,
+  "difficulty": {
+    "role": "calibration_candidate",
+    "calibration_required": true,
+    "comparison_eligible": false,
+    "independent_instance_id": "ledger_engine:v1",
+    "independence_reviewed": false
+  }
+}
