@@ -107,3 +107,61 @@ class QueueWorkerBoundaryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'duration exceeds'):
                 run('image','unused',rate=1000,duration=101)
             constructor.assert_not_called()
+
+class QueueMeasurementTests(unittest.TestCase):
+    def test_timeout_overlap_is_unqualified_without_erasing_loss(self):
+        source=events(2);accepted=[[e['tenant'],e['id']] for e in source]
+        sink=dict(effects=[expected(source[0])],attempts=[dict(started=0,finished=1.2,status=201)],peak_inflight=100)
+        result=evaluate(source,accepted,sink,[],drained=False)
+        self.assertFalse(result['success'])
+        self.assertFalse(result['correctness_and_drain_passed'])
+        self.assertEqual(len(result['missing_effects']),1)
+        self.assertIsNone(result['observed_sink_processing_bound_passed'])
+        self.assertEqual(result['concurrency_measurement']['cause'],'unattributed')
+    def test_unknown_bound_cannot_pass_even_with_complete_effects(self):
+        source=events(1);accepted=[[e['tenant'],e['id']] for e in source]
+        for finished in (None,1.0):
+            sink=dict(effects=[expected(source[0])],attempts=[dict(started=0,finished=finished,status=201)],peak_inflight=1)
+            result=evaluate(source,accepted,sink,[],drained=True)
+            self.assertTrue(result['correctness_and_drain_passed'])
+            self.assertFalse(result['success'])
+            self.assertIsNone(result['http_concurrency_verified'])
+    def test_short_intervals_only_qualify_observed_processing_bound(self):
+        source=events(1);sink=dict(effects=[expected(source[0])],attempts=[dict(started=0,finished=.2,status=201)],peak_inflight=2)
+        result=evaluate(source,[[source[0]['tenant'],source[0]['id']]],sink,[],drained=True)
+        self.assertTrue(result['observed_sink_processing_bound_passed'])
+        self.assertIsNone(result['http_concurrency_verified'])
+
+    def test_snapshot_is_one_view_while_wal_writer_commits_between_reads(self):
+        import contextlib,io,sqlite3,tempfile,threading
+        from pathlib import Path
+        from scalability.runner import SNAPSHOT_SCRIPT
+        with tempfile.TemporaryDirectory() as directory:
+            path=str(Path(directory)/'sink.sqlite')
+            connect=sqlite3.connect
+            db=connect(path);db.execute('PRAGMA journal_mode=WAL')
+            db.executescript('CREATE TABLE effects(tenant,id,body,committed); CREATE TABLE attempts(tenant,id,started,finished,status,dropped,fault_header); CREATE TABLE metrics(name,value);')
+            db.execute('INSERT INTO effects VALUES(?,?,?,?)',('t','a',json.dumps({'tenant':'t','id':'a'}),1));db.commit();db.close()
+            read_done=threading.Event();written=threading.Event();errors=[]
+            def writer():
+                try:
+                    if not read_done.wait(5):raise AssertionError('reader barrier missing')
+                    c=connect(path);c.execute('INSERT INTO effects VALUES(?,?,?,?)',('t','b',json.dumps({'tenant':'t','id':'b'}),2));c.commit();c.close()
+                except BaseException as exc:errors.append(exc)
+                finally:written.set()
+            def reader_connect(*args,**kwargs):
+                c=connect(*args,**kwargs)
+                def trace(sql):
+                    if sql=='SELECT tenant,id,committed FROM effects':
+                        read_done.set()
+                        if not written.wait(5):errors.append(AssertionError('writer barrier missing'))
+                c.set_trace_callback(trace);return c
+            thread=threading.Thread(target=writer);thread.start()
+            output=io.StringIO()
+            with patch('sqlite3.connect',side_effect=reader_connect),patch('sys.argv',['snapshot',path]),contextlib.redirect_stdout(output):
+                exec(SNAPSHOT_SCRIPT,{})
+            thread.join(5);self.assertFalse(thread.is_alive());self.assertEqual(errors,[])
+            snapshot=json.loads(output.getvalue())
+            self.assertEqual([e['id'] for e in snapshot['effects']],['a'])
+            self.assertEqual([e['id'] for e in snapshot['effect_times']],['a'])
+            c=connect(path);self.assertEqual(c.execute('SELECT COUNT(*) FROM effects').fetchone()[0],2);c.close()

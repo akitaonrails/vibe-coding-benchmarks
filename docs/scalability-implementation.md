@@ -50,7 +50,7 @@ that exit before processing are candidate failures, while broker/sink setup
 failures are infrastructure-invalid. No external broker or database is touched.
 
 The development runner records publication confirmations and ambiguous-confirm
-retries, scheduled/confirmed arrival timestamps, durable effect timestamps,
+retries, scheduled/confirmed arrival timestamps, pre-commit effect transaction timestamps,
 completed-effect latency percentiles plus unresolved counts, HTTP attempts,
 poison deadletters, broker-ready/unacked samples and Docker resource samples.
 It compares full content and identity, reports missing and incorrect outputs,
@@ -59,8 +59,13 @@ runtime runner; later integration must preserve the existing fixed-nudge and
 token-accounting controls.
 
 HTTP concurrency has a deliberate measurement limit: the sink can retain a
-handler after its client timed out or died. Strict peak-concurrency checks apply
-only to clean/slow responses below the timeout. Fault-mode server-handler peaks
+handler after its client timed out or died. The observed processing-bound check applies only to clean/slow trials whose
+recorded attempts all finish below the request timeout. Any unfinished or
+timeout-exceeding span makes the trial `measurement_unqualified`, with cause
+unattributed: the consumer may itself overload the sink. Raw correctness and
+drain outcomes remain in the receipt; an unknown bound cannot yield a qualified
+pass. Even below the timeout, sink intervals exclude admission/network time and
+final commit completion, so they do not verify actual client concurrency. Fault-mode server-handler peaks
 are reported, not treated as proof of excessive client concurrency. Per-delivery
 retry caps, local buffer bounds and precise backoff cannot be fully inferred from
 sink requests; the receipt explicitly does not claim those are verified.
@@ -76,13 +81,17 @@ a qualified staircase/soak scalability harness**. Every receipt sets
 load window and call the result sustainable throughput. Continuous telemetry,
 infrastructure headroom, repeated trials and preregistered SLOs remain necessary.
 
-The 21 focused regressions in `tests/test_scalability.py` pass. The trusted
+The 25 focused regressions in `tests/test_scalability.py` pass. The trusted
 infrastructure worker passed all seven real-process scenarios. Actual defective
 workers were detected for early ACK, incorrect effects, poison retry loops,
 missing reconnection and unbounded fanout; the last produced 31 simultaneous
 sink operations against the limit of eight. These are evaluator qualification
 results, not language rankings. Native reference qualification is recorded
-separately; larger-load capacity calibration remains outstanding.
+separately. Eight [10,000-message exploratory trials](scalability-load-validation.md)
+now exercise two concurrency profiles. The lower profile drained correctly; the
+higher profile exposed timeout overlap and inconsistent historical snapshots.
+The measurement defects are corrected below, but sustainable capacity remains
+unqualified.
 
 Initial readiness, Docker address-pool and sink-counter failures are preserved
 in local receipts. The counter originally included handlers after exposing their
@@ -131,3 +140,19 @@ remain. Oversized duration/rate products and payload budgets are rejected, never
 silently shortened. The installed `queuebench` entry point also supports these
 commands and includes trusted infrastructure assets; native image build contexts
 remain in the source checkout.
+
+
+Every sink snapshot now reads effects, timestamp rows, attempts and peak metrics
+inside one explicit SQLite read transaction. Its view is fixed at the first
+SELECT; acquisition start/end timestamps bracket that cutoff. The final snapshot
+can include work completed after the preceding drain poll. Broker and deadletter
+observations happen separately and are not a cross-service atomic snapshot.
+A deterministic WAL writer regression commits between the reader's queries and
+verifies that effect counts and timestamp rows still represent one view.
+
+Latency uses the timestamp recorded before the effect transaction's commit,
+for effects subsequently visible as committed. It excludes commit completion
+latency and must not be labeled exact durability completion. Attempt end times
+also precede the final attempt-record commit and response transmission. Receipts
+record the runner source SHA-256 so changes to these measurement rules can be
+identified independently of unchanged container image IDs.

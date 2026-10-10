@@ -21,6 +21,31 @@ SCENARIOS=('clean','slow','lost_response','kill_poison','broker_restart','shutdo
 ROOT=Path(__file__).resolve().parent
 SECRETS=set()
 
+# The first SELECT establishes the WAL read snapshot. All tables share that view.
+SNAPSHOT_SCRIPT = """import sqlite3,json,sys,time
+started=time.time()
+c=sqlite3.connect(sys.argv[1]);c.row_factory=sqlite3.Row
+try:
+ c.execute('BEGIN')
+ effects=[json.loads(r[0]) for r in c.execute('SELECT body FROM effects')]
+ out={'effects':effects,'effect_times':[dict(r) for r in c.execute('SELECT tenant,id,committed FROM effects')],'attempts':[dict(r) for r in c.execute('SELECT tenant,id,started,finished,status,dropped,fault_header FROM attempts')],'peak_inflight':c.execute("SELECT COALESCE(MAX(value),0) FROM metrics WHERE name='peak_inflight'").fetchone()[0]}
+ out['snapshot']={'read_started_at':started,'read_finished_at':time.time(),'consistency':'One SQLite read transaction; view fixed by first SELECT. Broker observations are separate.'}
+finally:
+ c.close()
+print(json.dumps(out))"""
+
+
+def concurrency_measurement(sink, required, timeout_seconds=1.0):
+    attempts=sink['attempts']
+    unfinished=sum(a.get('finished') is None for a in attempts)
+    exceeded=sum(a.get('finished') is not None and a['finished']-a['started']>=timeout_seconds for a in attempts)
+    qualified=required and not unfinished and not exceeded
+    return {'required':required,'qualified':qualified,'unfinished_attempts':unfinished,
+            'timeout_exceeding_spans':exceeded,'request_timeout_seconds':timeout_seconds,
+            'cause':'unattributed' if required and not qualified else None,
+            'basis':'Observed sink processing intervals, excluding final commit completion and network/admission time; not proof of client concurrency.'}
+
+
 def sanitize(value):
     for secret in SECRETS:value=value.replace(secret,'[REDACTED]')
     return value
@@ -75,9 +100,11 @@ def evaluate(manifest,accepted,sink,dead,*,limit=8,drained=False,enforce_concurr
     missing_effects=[list(k) for k,e in source.items() if not e['poison'] and k not in actual]
     missing_poison=[list(k) for k,e in source.items() if e['poison'] and k not in dead_keys]
     wrong_attempts=sum(a.get('status')==409 for a in sink['attempts'])
-    concurrency_ok=(sink['peak_inflight']<=limit) if enforce_concurrency else None
-    success=not(publication_missing or missing_effects or missing_poison or bad or bad_dead or wrong_attempts) and concurrency_ok is not False and drained
-    return dict(success=success,publication_missing=publication_missing,accepted=len(source),correct_effects=sum(k in actual and actual[k]==expected(e) for k,e in source.items() if not e['poison']),missing_effects=missing_effects,missing_poison=missing_poison,incorrect_effects=bad,incorrect_deadletters=bad_dead,wrong_attempts=wrong_attempts,peak_observed_sink_handlers=sink['peak_inflight'],http_concurrency_verified=concurrency_ok,drained=drained,http_attempts=len(sink['attempts']),deadletter_copies=len(dead),retry_policy_verification='Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified.')
+    measurement=concurrency_measurement(sink,enforce_concurrency)
+    concurrency_ok=(sink['peak_inflight']<=limit) if measurement['qualified'] else None
+    correctness=not(publication_missing or missing_effects or missing_poison or bad or bad_dead or wrong_attempts) and drained
+    success=correctness and (not enforce_concurrency or concurrency_ok is True)
+    return dict(success=success,correctness_and_drain_passed=correctness,concurrency_measurement=measurement,observed_sink_processing_bound_passed=concurrency_ok,publication_missing=publication_missing,accepted=len(source),correct_effects=sum(k in actual and actual[k]==expected(e) for k,e in source.items() if not e['poison']),missing_effects=missing_effects,missing_poison=missing_poison,incorrect_effects=bad,incorrect_deadletters=bad_dead,wrong_attempts=wrong_attempts,peak_observed_sink_handlers=sink['peak_inflight'],http_concurrency_verified=None,drained=drained,http_attempts=len(sink['attempts']),deadletter_copies=len(dead),retry_policy_verification='Per-delivery retry caps/backoff are not fully observable from sink requests alone; not claimed verified.')
 
 
 
@@ -233,11 +260,7 @@ print(json.dumps({'reachable_host_addresses':reachable}))"""
         return json.loads(result.stdout)
 
     def snapshot(self):
-        script="""import sqlite3,json
-c=sqlite3.connect('/state/sink.sqlite');c.row_factory=sqlite3.Row
-out={'effects':[json.loads(r[0]) for r in c.execute('SELECT body FROM effects')],'effect_times':[dict(r) for r in c.execute('SELECT tenant,id,committed FROM effects')],'attempts':[dict(r) for r in c.execute('SELECT tenant,id,started,finished,status,dropped,fault_header FROM attempts')],'peak_inflight':c.execute(\"SELECT COALESCE(MAX(value),0) FROM metrics WHERE name='peak_inflight'\").fetchone()[0]}
-print(json.dumps(out))"""
-        return json.loads(docker('exec',self.sink,'python','-I','-c',script).stdout)
+        return json.loads(docker('exec',self.sink,'python','-I','-c',SNAPSHOT_SCRIPT,'/state/sink.sqlite').stdout)
 
     def queues(self):
         output=docker('exec','--user','rabbitmq',self.broker,'rabbitmqctl','-q','list_queues','name','messages_ready','messages_unacknowledged','--formatter=json',timeout=15).stdout
@@ -277,7 +300,7 @@ def run(worker_image,destination,*,command=(),scenario='clean',count=96,rate=0,d
     if seed is None:seed=secrets.randbits(63)
     if type(seed) is not int or seed<0:raise ValueError('invalid seed')
     output=Path(destination);output.mkdir(parents=True,exist_ok=False)
-    result={'kind':'queue_development_trial','scalable_capacity_qualified':False,'scenario':scenario,'requested_events':count,'seed':seed,'offered_rate':rate,'duration_seconds':duration,'payload_bytes':payload_bytes,'command':list(command),'resource_limits':dict(cpus=cpus,memory_mb=memory_mb,pids=pids,max_inflight=max_inflight,prefetch=prefetch),'infrastructure_limits':dict(sink_memory_mb=sink_memory_mb,sink_pids=max(128,max_inflight*4+64),sink_cpus=2,broker_cpus=2,broker_memory_mb=1024),'validity':'infrastructure_invalid','fault_triggered':scenario in ('clean','slow','lost_response'),'telemetry':[]}
+    result={'runner_source_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'kind':'queue_development_trial','scalable_capacity_qualified':False,'scenario':scenario,'requested_events':count,'seed':seed,'offered_rate':rate,'duration_seconds':duration,'payload_bytes':payload_bytes,'command':list(command),'resource_limits':dict(cpus=cpus,memory_mb=memory_mb,pids=pids,max_inflight=max_inflight,prefetch=prefetch),'infrastructure_limits':dict(sink_memory_mb=sink_memory_mb,sink_pids=max(128,max_inflight*4+64),sink_cpus=2,broker_cpus=2,broker_memory_mb=1024),'validity':'infrastructure_invalid','fault_triggered':scenario in ('clean','slow','lost_response'),'telemetry':[]}
     trial=None;phase='infrastructure_setup'
     try:
         trial=Trial(worker_image,command,cpus=cpus,memory_mb=memory_mb,pids=pids,max_inflight=max_inflight,prefetch=prefetch,sink_memory_mb=sink_memory_mb,mutant=mutant)
@@ -365,7 +388,7 @@ def run(worker_image,destination,*,command=(),scenario='clean',count=96,rate=0,d
         verdict=evaluate(manifest,accepted,snapshot,dead,drained=drained,limit=max_inflight,enforce_concurrency=scenario in ('clean','slow'))
         scheduled={(e['tenant'],e['id']):e['scheduled'] for e in publication['scheduled_publications']}
         latencies=sorted(e['committed']-scheduled[(e['tenant'],e['id'])] for e in snapshot['effect_times'] if (e['tenant'],e['id']) in scheduled)
-        result['latency_seconds']={'p50':latencies[int((len(latencies)-1)*.50)] if latencies else None,'p95':latencies[int((len(latencies)-1)*.95)] if latencies else None,'p99':latencies[int((len(latencies)-1)*.99)] if latencies else None,'completed_effects':len(latencies),'unresolved_healthy':len(verdict['missing_effects']),'basis':'Scheduled publisher wall time to durable sink commit, successes only with unresolved count retained.'}
+        result['latency_seconds']={'p50':latencies[int((len(latencies)-1)*.50)] if latencies else None,'p95':latencies[int((len(latencies)-1)*.95)] if latencies else None,'p99':latencies[int((len(latencies)-1)*.99)] if latencies else None,'completed_effects':len(latencies),'unresolved_healthy':len(verdict['missing_effects']),'basis':'Scheduled publisher wall time to pre-commit transaction timestamp of a subsequently committed effect; excludes commit completion time. Successes only, unresolved count retained.'}
         cpu=result['load_metrics']['last_observed_cgroup_cpu_usec']
         result['load_metrics']['cpu_usec_per_correct_effect_including_startup']=cpu/verdict['correct_effects'] if scenario in ('clean','slow') and cpu is not None and verdict['correct_effects'] else None
         if result.get('shutdown',{}).get('within_deadline') is False:verdict['success']=False
@@ -373,10 +396,12 @@ def run(worker_image,destination,*,command=(),scenario='clean',count=96,rate=0,d
         if scenario=='lost_response':result['fault_triggered']=any(a['dropped'] for a in snapshot['attempts'])
         if scenario=='slow':result['fault_triggered']=any(a['finished'] is not None and a['finished']-a['started']>=.05 for a in snapshot['attempts'])
         result.update(verdict=verdict,validity='valid_development' if result['fault_triggered'] else 'infrastructure_invalid')
+        if scenario in ('clean','slow') and not verdict['concurrency_measurement']['qualified']:
+            result['validity']='measurement_unqualified'
         if scenario=='handler_crash':
             if approved_hook is None:result['validity']='hook_review_required'
             elif not result['handler_fault']['hook_execution_supported_by_review_and_trace']:verdict['success']=False
-        result['limitations']=['Not a sustainable capacity measurement.','Per-delivery retry caps and local buffered work are not fully externally verified.','Broker prefetch/unacked sampling is observational, not a continuous proof.','Server handlers surviving client cancellation are not client concurrency; hard peak gate applies only clean/slow scenarios.','Publisher uses a one-message confirm window; scheduling lag must qualify offered rate before any capacity inference.','No stack comparison from a single development run.']
+        result['limitations']=['Not a sustainable capacity measurement.','Per-delivery retry caps and local buffered work are not fully externally verified.','Broker prefetch/unacked sampling is observational, not a continuous proof.','Sink processing intervals do not prove client concurrency; clean/slow timeout-overlap measurements are unqualified, with cause unattributed.','Publisher uses a one-message confirm window; scheduling lag must qualify offered rate before any capacity inference.','No stack comparison from a single development run.']
     except Exception as exc:
         result['validity']='candidate_failure' if isinstance(exc,CandidateFailure) else 'infrastructure_invalid'
         result['error']=type(exc).__name__+': '+sanitize(str(exc))[:400];result['phase']=phase
