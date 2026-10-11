@@ -36,6 +36,13 @@ ENDPOINT = 'https://api.anthropic.com/v1/messages?beta=true'
 BUILTIN_PLUGINS = ('sec-default','agents-md','telemetry','plugin-authoring','mods-guide',
                    'tips','mermaid','responsive-mode','diff','you-should-know','claude-test')
 DISABLED_PLUGINS = {'cc-plugin-'+name+'@builtin':False for name in BUILTIN_PLUGINS}
+REJECTION_REASONS = frozenset(('invalid request shape','streaming request required','wire model mismatch',
+    'wire effort mismatch','wire capability mismatch','subscription OAuth required','path rejected',
+    'framing rejected','incomplete request','response bound','allowance unavailable','allowance bound',
+    'extra usage must be disabled','allowance unknown','pending_request_bound','request_admission_timeout',
+    'invalid_transport_data','invalid_response_event','invalid_response_message','response_model_mismatch',
+    'response_capability_mismatch','concurrent_request_rejected'))
+
 
 
 
@@ -81,7 +88,8 @@ class ClaudeTransport:
     """Local fixed Messages destination, enforcing subscription and request capabilities."""
     def __init__(self, opener=None):
         self.records=[]; self.rejections=[]; self.fatal=None; self.rate_latched=False
-        self.condition=threading.Condition(); self.active=0; self.accepting=True; self.responses=[]
+        self.condition=threading.Condition(); self.active=0; self.pending=0; self.accepting=True; self.responses=[]
+        self.deadline=float('inf')
         self.allowance_checked=False; self.allowance=None
         self.opener=opener or urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
         owner=self
@@ -91,8 +99,22 @@ class ClaudeTransport:
             def do_POST(self):
                 with owner.condition:
                     if not owner.accepting: self.send_error(503); return
+                    admission_started=time.monotonic()
                     if owner.active:
-                        owner.fatal='concurrent_request_rejected'; self.send_error(503); return
+                        if owner.pending:
+                            owner.reject('pending_request_bound', False); self.send_error(503); return
+                        owner.pending+=1
+                        try:
+                            ready=owner.condition.wait_for(lambda:not owner.accepting or owner.active==0,
+                                max(0,min(15,owner.deadline-time.monotonic())))
+                        finally:
+                            owner.pending-=1;owner.condition.notify_all()
+                        if not owner.accepting:self.send_error(503);return
+                        if not ready:
+                            owner.reject('request_admission_timeout', False);self.send_error(503);return
+                    if time.monotonic()>=owner.deadline:
+                        self.send_error(503);return
+                    admission_wait=time.monotonic()-admission_started
                     owner.active += 1
                 evidence=None
                 try:
@@ -103,7 +125,8 @@ class ClaudeTransport:
                     data=self.rfile.read(length)
                     if len(data)!=length: raise ValueError('incomplete request')
                     body=json.loads(data); evidence=inspect_request(body, dict(self.headers))
-                    evidence.update(index=len(owner.records), started_at=time.time(), usage={}, response_ids=[])
+                    evidence.update(index=len(owner.records), started_at=time.time(), usage={}, response_ids=[],
+                                    admission_wait_seconds=admission_wait)
                     owner.records.append(evidence)
                     if owner.rate_latched:
                         evidence.update(http_status=429, upstream_sent=False, quota_retry_blocked=True)
@@ -140,8 +163,7 @@ class ClaudeTransport:
                         evidence['response_complete']=True
                 except Exception as error:
                     if isinstance(error,ValueError):
-                        owner.fatal='request_or_response_boundary_rejected'
-                        owner.rejections.append({'error_type':type(error).__name__, 'upstream_sent':bool(evidence and evidence.get('upstream_sent'))})
+                        owner.reject(str(error), bool(evidence and evidence.get('upstream_sent')))
                     elif evidence is not None: evidence['transport_error']=type(error).__name__
                     try: self.send_error(502)
                     except OSError: pass
@@ -152,6 +174,11 @@ class ClaudeTransport:
         self.server.daemon_threads=True
         self.thread=threading.Thread(target=self.server.serve_forever,daemon=True); self.thread.start()
         self.base_url='http://127.0.0.1:'+str(self.server.server_port)
+
+    def reject(self, reason, upstream_sent):
+        safe=reason if reason in REJECTION_REASONS else 'invalid_transport_data'
+        self.fatal=safe
+        self.rejections.append({'reason':safe,'upstream_sent':upstream_sent,'observed_at':time.time()})
 
     def check_allowance(self, authorization):
         request=urllib.request.Request('https://api.anthropic.com/api/oauth/usage',
@@ -174,12 +201,12 @@ class ClaudeTransport:
         if not line.strip().startswith(b'data:'): return
         try: value=json.loads(line.strip()[5:])
         except ValueError: return
-        if not isinstance(value,dict): self.fatal='invalid_response_event'; return
+        if not isinstance(value,dict): self.reject('invalid_response_event',True); return
         kind=value.get('type')
         if kind=='message_start':
             message=value.get('message',{})
-            if not isinstance(message,dict): self.fatal='invalid_response_message'; return
-            if message.get('model')!=MODEL: self.fatal='response_model_mismatch'
+            if not isinstance(message,dict): self.reject('invalid_response_message',True); return
+            if message.get('model')!=MODEL: self.reject('response_model_mismatch',True)
             record['response_ids'].append(message.get('id'))
             record['usage'].update(message.get('usage',{}))
         elif kind=='message_delta':
@@ -187,12 +214,12 @@ class ClaudeTransport:
         elif kind=='message_stop': record['message_stopped']=True
         elif kind=='content_block_start':
             block=value.get('content_block',{})
-            if block.get('type')=='tool_use' and block.get('name')!=TOOL: self.fatal='response_capability_mismatch'
+            if block.get('type')=='tool_use' and block.get('name')!=TOOL: self.reject('response_capability_mismatch',True)
 
     def settle(self, timeout=15):
         with self.condition:
-            self.accepting=False
-            if not self.condition.wait_for(lambda:self.active==0,timeout): raise RuntimeError('provider request did not settle')
+            self.accepting=False;self.condition.notify_all()
+            if not self.condition.wait_for(lambda:self.active==0 and self.pending==0,timeout): raise RuntimeError('provider request did not settle')
 
     def close(self):
         import socket
@@ -258,7 +285,7 @@ class ClaudeCLI:
         self.mcp=self.home/'mcp.json';write_private(self.mcp,json.dumps({'mcpServers':{'langbench':{'command':command[0],'args':command[1:]}}}))
         self.settings=self.home/'settings.json';write_private(self.settings,json.dumps({'disableAllHooks':True,'autoMemoryEnabled':False,'enabledPlugins':DISABLED_PLUGINS,'effortLevel':EFFORT,'permissions':{'allow':[TOOL],'defaultMode':'dontAsk'}}))
         self.identity={'provider':'claude','model':MODEL,'effort':EFFORT,'version':VERSION,'binary_sha256':BINARY_SHA,
-            'auth_mode':'canonical_subscription_oauth','endpoint':ENDPOINT,'tool':TOOL,'policy_version':'claude-mcp-only-v1',
+            'auth_mode':'canonical_subscription_oauth','endpoint':ENDPOINT,'tool':TOOL,'policy_version':'claude-mcp-only-v1','transport_policy':'serial-admission-v2',
             'settings':json.loads(self.settings.read_text()),'environment':{k:v for k,v in self.env.items() if k!='HOME'}}
 
     def argv(self,prompt,session):
@@ -289,7 +316,7 @@ class ClaudeCLI:
             if self.transport.rate_latched: return 'quota'
             if any(r.get('result',{}).get('termination')=='timeout' for r in self.bridge.records[tool_start:]): return 'candidate_timeout'
         active_start=time.monotonic();auth_seconds=active_start-start
-        self.bridge.deadline=active_start+seconds
+        self.bridge.deadline=active_start+seconds;self.transport.deadline=active_start+seconds
         raw=bounded_process(self.argv(prompt,session),cwd=self.cwd,env=env,timeout=seconds,stop=stop)
         active_seconds=time.monotonic()-active_start;cleanup_start=time.monotonic()
         for name in ('stdout','stderr'):
@@ -304,7 +331,10 @@ class ClaudeCLI:
             'raw_path':str(directory/'raw.json'),'events':[],'tool_records':self.bridge.records[tool_start:],
             'request_records':self.transport.records[request_start:],'cleanup_unsettled':errors,'quiescent':not errors,
             'artifact_available':False,'usage_records':[],'usage_coverage_verified':False,'subscription_auth_verified':True,
-            'allowance':self.transport.allowance}
+            'allowance':self.transport.allowance,
+            'transport_diagnostics':{'fatal':self.transport.fatal if self.transport.fatal in REJECTION_REASONS else ('invalid_transport_data' if self.transport.fatal else None),
+                                     'rejections':list(self.transport.rejections)},
+            'bridge_boundary_rejected':bool(self.bridge.fatal)}
         try:
             events,text,result,initialized=parse_events(raw['stdout'],self.session,truncated=raw['termination'] in ('timeout','candidate_timeout'))
             invocation.update(events=events,terminal_text=text,effective_configuration_verified=initialized)

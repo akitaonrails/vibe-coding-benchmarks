@@ -53,7 +53,7 @@ class ClaudeTests(unittest.TestCase):
         self.assertEqual(duplicate['total'],100);self.assertEqual(duplicate['known_subtotal'],100)
 
     def test_stream_cumulative_output_not_added(self):
-        transport=c.ClaudeTransport.__new__(c.ClaudeTransport);transport.fatal=None
+        transport=c.ClaudeTransport.__new__(c.ClaudeTransport);transport.fatal=None;transport.rejections=[]
         row={'usage':{},'response_ids':[]}
         for event in [
             {'type':'message_start','message':{'model':c.MODEL,'id':'msg','usage':{'input_tokens':10,'cache_read_input_tokens':20,'cache_creation_input_tokens':30,'output_tokens':1}}},
@@ -100,12 +100,88 @@ class ClaudeTests(unittest.TestCase):
                 try:urllib.request.urlopen(req,timeout=3).read()
                 except urllib.error.HTTPError as error:return error.code
             self.assertEqual(send(body(model='wrong')),502);self.assertFalse(opener.urls)
+            self.assertEqual(transport.rejections[0]['reason'],'wire model mismatch')
             transport.fatal=None
             self.assertEqual(send(body()),429)
             self.assertEqual(opener.urls,['https://api.anthropic.com/api/oauth/usage'])
             self.assertEqual(send(body()),429);self.assertEqual(len(opener.urls),1)
             self.assertTrue(transport.records[-1]['quota_retry_blocked'])
         finally:transport.close()
+
+    def test_next_request_after_message_stop_waits_for_http_close(self):
+        release=threading.Event();first_stopped=threading.Event();opened=[]
+        class Response:
+            status=200;headers={'Content-Type':'text/event-stream'}
+            def __init__(self,first):self.first=first;self.sent=False
+            def __enter__(self):return self
+            def __exit__(self,*args):pass
+            def read1(self,n):
+                if not self.sent:self.sent=True;return b'data: {"type":"message_stop"}\n\n'
+                if self.first:first_stopped.set();release.wait(3)
+                return b''
+            def close(self):release.set()
+        class Opener:
+            def open(self,*args,**kwargs):
+                opened.append(1);return Response(len(opened)==1)
+        transport=c.ClaudeTransport(Opener());transport.allowance_checked=True
+        outcomes=[]
+        def send():
+            req=urllib.request.Request(transport.base_url+'/v1/messages',data=json.dumps(body()).encode(),headers={'Authorization':'Bearer sk-ant-oat-fixture'})
+            try:
+                with urllib.request.urlopen(req,timeout=4) as response:response.read();outcomes.append(response.status)
+            except urllib.error.HTTPError as error:outcomes.append(error.code)
+        first=threading.Thread(target=send);second=threading.Thread(target=send)
+        try:
+            first.start();self.assertTrue(first_stopped.wait(2));second.start()
+            until=time.monotonic()+2
+            while transport.pending!=1 and time.monotonic()<until:time.sleep(.001)
+            self.assertEqual(transport.pending,1);self.assertEqual(len(opened),1)
+            self.assertEqual(transport.active,1);self.assertIsNone(transport.fatal)
+            release.set();first.join(3);second.join(3)
+            self.assertEqual(outcomes,[200,200]);self.assertEqual(len(opened),2)
+            self.assertGreater(transport.records[1]['admission_wait_seconds'],0)
+            self.assertIsNone(transport.fatal)
+        finally:
+            release.set();first.join(3)
+            if second.ident is not None:second.join(3)
+            transport.close()
+
+    def test_shutdown_cancels_queued_request(self):
+        class Opener:
+            def open(self,*args,**kwargs):raise AssertionError('must not forward')
+        transport=c.ClaudeTransport(Opener());transport.active=1;outcomes=[]
+        def send():
+            req=urllib.request.Request(transport.base_url+'/v1/messages',data=json.dumps(body()).encode(),headers={'Authorization':'Bearer sk-ant-oat-fixture'})
+            try:urllib.request.urlopen(req,timeout=2)
+            except urllib.error.HTTPError as error:outcomes.append(error.code)
+        waiting=threading.Thread(target=send)
+        try:
+            waiting.start();until=time.monotonic()+1
+            while transport.pending!=1 and time.monotonic()<until:time.sleep(.001)
+            self.assertEqual(transport.pending,1)
+            with self.assertRaises(RuntimeError):transport.settle(timeout=.03)
+            waiting.join(1);self.assertEqual(outcomes,[503]);self.assertEqual(transport.pending,0)
+            self.assertIsNone(transport.fatal);self.assertFalse(transport.records)
+        finally:
+            with transport.condition:transport.active=0;transport.condition.notify_all()
+            waiting.join(2);transport.close()
+
+    def test_admission_timeout_records_safe_reason_without_upstream(self):
+        class Opener:
+            def open(self,*args,**kwargs):raise AssertionError('must not forward')
+        transport=c.ClaudeTransport(Opener());transport.active=1;transport.deadline=time.monotonic()+.03
+        try:
+            req=urllib.request.Request(transport.base_url+'/v1/messages',data=json.dumps(body()).encode(),headers={'Authorization':'Bearer sk-ant-oat-fixture'})
+            with self.assertRaises(urllib.error.HTTPError) as raised:urllib.request.urlopen(req,timeout=2)
+            self.assertEqual(raised.exception.code,503)
+            self.assertEqual(transport.fatal,'request_admission_timeout')
+            self.assertEqual(transport.pending,0);self.assertFalse(transport.records)
+            self.assertFalse(transport.rejections[0]['upstream_sent'])
+            transport.reject('secret-token-must-not-persist',False)
+            self.assertNotIn('secret-token',json.dumps(transport.rejections))
+        finally:
+            with transport.condition:transport.active=0;transport.condition.notify_all()
+            transport.close()
 
     def test_allowance_extra_usage_denied(self):
         class Response(io.BytesIO):status=200
@@ -120,7 +196,7 @@ class ClaudeTests(unittest.TestCase):
         def settle():
             if settle_error:raise RuntimeError('unsettled')
         adapter.bridge=SimpleNamespace(records=[],fatal=None,deadline=0,settle=lambda:None)
-        adapter.transport=SimpleNamespace(records=[request()],base_url='http://127.0.0.1:1',fatal=None,rate_latched=False,settle=settle,allowance={'extra_usage_enabled':False})
+        adapter.transport=SimpleNamespace(records=[request()],base_url='http://127.0.0.1:1',fatal=None,rejections=[],rate_latched=False,settle=settle,allowance={'extra_usage_enabled':False})
         return adapter
 
     def test_timeout_truncated_stream_preserves_evidence(self):
@@ -133,6 +209,7 @@ class ClaudeTests(unittest.TestCase):
             self.assertEqual(result['cleanup_unsettled'][0]['component'],'transport')
             self.assertTrue(Path(result['raw_path']).exists());self.assertTrue(result['events'])
             self.assertFalse(result['usage_coverage_verified'])
+            self.assertEqual(result['transport_diagnostics'],{'fatal':None,'rejections':[]})
 
     def test_no_api_auth_fallback_and_session_resume(self):
         with tempfile.TemporaryDirectory() as d:
