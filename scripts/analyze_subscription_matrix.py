@@ -249,12 +249,12 @@ def summarize(rows):
     return summaries
 
 
-def analyze(directory):
+def analyze(directory, *, plan_validator=validate_plan, row_builder=attempt_row):
     directory = Path(directory)
     plan_bytes = (directory / 'plan.json').read_bytes()
     progress_bytes = (directory / 'matrix.json').read_bytes()
     plan, progress = json.loads(plan_bytes), json.loads(progress_bytes)
-    cells = validate_plan(plan)
+    cells = plan_validator(plan)
     if sha(plan_bytes) != progress.get('plan_sha256'):
         raise ValueError('plan SHA mismatch')
     if [c['id'] for c in cells] != [s['id'] for s in progress.get('cells', [])]:
@@ -274,7 +274,7 @@ def analyze(directory):
             results[cell['id']] = {}
         receipts[cell['id']] = committed
     overrides, override_rows = overrides_for(directory, receipts)
-    rows = [attempt_row(c, s, results[c['id']], directory, overrides.get(c['id']), receipts[c['id']])
+    rows = [row_builder(c, s, results[c['id']], directory, overrides.get(c['id']), receipts[c['id']])
             for c, s in zip(cells, progress['cells'])]
     operations = jsonl(directory / 'operations.jsonl')
     supervisor = jsonl(directory / 'supervisor-audit.jsonl')
