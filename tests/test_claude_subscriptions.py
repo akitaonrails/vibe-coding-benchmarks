@@ -65,6 +65,19 @@ class ClaudeTests(unittest.TestCase):
         transport.observe(row,b'data: '+json.dumps({'type':'content_block_start','content_block':{'type':'tool_use','name':'Bash'}}).encode())
         self.assertEqual(transport.fatal,'response_capability_mismatch')
 
+    def test_live_init_builtin_plugins_are_rejected(self):
+        init={'type':'system','subtype':'init','model':c.MODEL,'tools':[c.TOOL],
+              'session_id':'session','apiKeySource':'none','skills':[],'slash_commands':[],
+              'agents':['claude','general-purpose','statusline-setup'],
+              'plugins':[{'name':'cc-plugin-agents-md','path':'builtin','source':'cc-plugin-agents-md@builtin'},
+                         {'name':'cc-plugin-plugin-authoring','path':'builtin','source':'cc-plugin-plugin-authoring@builtin'}]}
+        with self.assertRaisesRegex(ValueError,'injected customization'):
+            c.parse_events(json.dumps(init),'session')
+        init['plugins']=[]
+        self.assertTrue(c.parse_events(json.dumps(init),'session')[3])
+        self.assertEqual(len(c.DISABLED_PLUGINS),11)
+        self.assertTrue(all(value is False for value in c.DISABLED_PLUGINS.values()))
+
     def test_event_identity_and_native_tools(self):
         self.assertTrue(c.parse_events(stream(),'session')[3])
         for invalid in (stream('other'),stream().replace(c.MODEL,'claude-sonnet'),stream().replace(c.TOOL,'Bash')):
@@ -145,6 +158,9 @@ class ClaudeTests(unittest.TestCase):
                     self.assertEqual(adapter.env['CLAUDE_CODE_DISABLE_CLAUDE_MDS'],'1')
                     self.assertEqual(adapter.env['HOME'],str(Path.home()))
                     self.assertTrue(adapter.identity['settings']['disableAllHooks'])
+                    self.assertEqual(adapter.identity['settings']['enabledPlugins'],c.DISABLED_PLUGINS)
+                    self.assertIs(adapter.identity['settings']['enabledPlugins']['cc-plugin-agents-md@builtin'],False)
+                    self.assertIs(adapter.identity['settings']['enabledPlugins']['cc-plugin-plugin-authoring@builtin'],False)
                     self.assertEqual(list(json.loads(adapter.mcp.read_text())['mcpServers']),['langbench'])
                 finally:adapter.close()
 

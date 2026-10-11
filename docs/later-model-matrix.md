@@ -15,3 +15,16 @@ On October 11, 2026, after the first cohort closed, a non-inference Codex app-se
 Claude's ambient configuration selected API-key authentication during the check. The benchmark adapter must explicitly exclude that route while preserving canonical subscription OAuth state. Public model configuration is documented by [Claude Code](https://code.claude.com/docs/en/model-config); public availability is not account entitlement evidence.
 
 Generate a new immutable plan with `python -m langbench.later_matrix plan codex PATH` (or `claude`). Run only after the corresponding exact adapter qualification and integration review: `python -m langbench.later_matrix run PLAN OUTPUT --qualification RECEIPT`. Add `--resume` only after diagnosing an incident or a controller interruption. This document does not assert that either follow-up coding cohort has run yet.
+
+## Qualification ledger
+
+These calls are harness setup effort, not candidate coding effort. Failed qualifications are retained.
+
+| Receipt | Result | Reported native tokens | Evidence |
+|---|---|---:|---|
+| `sol-medium-qualification-1` | Passed; final evidence review accepted | 36,103 | Exact JavaScript isolation probe, host canary, resumed session and native usage reconciliation |
+| `opus-medium-qualification-1` | Failed effective-configuration check | 3,135 | Two successful exact-model/medium OAuth requests with the sole sandbox tool; CLI initialization still listed two built-in plugins |
+
+| `opus-medium-qualification-2` | Passed; final evidence review accepted | 4,983 | Explicitly disabled all pinned built-in plugins; exact wire identity, OAuth route, tool inventory, resumed session and native accounting passed |
+
+The first Opus failure was corrected by explicitly disabling all 11 built-in plugins identified in the pinned CLI; an empty map had preserved defaults. The failed receipt remains unchanged. Final independent review accepted both current qualifications and their source/runtime bindings. No coding cell was consumed by these setup probes.

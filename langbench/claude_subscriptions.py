@@ -32,6 +32,11 @@ BINARY_SHA = 'ea38ee1a1f946eea9bc6e97fb912dbe71fc379b25cc605d91b308afa1ca08be7'
 BINARY = Path.home()/'.local/share/mise/installs/claude'/VERSION/'claude'
 TOOL = 'mcp__langbench__sandbox_shell'
 ENDPOINT = 'https://api.anthropic.com/v1/messages?beta=true'
+# Pinned 2.1.290 lCe registry; qee reads name@builtin from enabledPlugins.
+BUILTIN_PLUGINS = ('sec-default','agents-md','telemetry','plugin-authoring','mods-guide',
+                   'tips','mermaid','responsive-mode','diff','you-should-know','claude-test')
+DISABLED_PLUGINS = {'cc-plugin-'+name+'@builtin':False for name in BUILTIN_PLUGINS}
+
 
 
 def exact(model, effort, retention='seal-v1'):
@@ -251,7 +256,7 @@ class ClaudeCLI:
         token=self.home/'bridge-token';write_private(token,self.bridge.token)
         command=[sys.executable,'-I',str(Path(__file__).with_name('mcp_bridge.py').resolve()),'--socket',str(self.bridge.path),'--token-file',str(token)]
         self.mcp=self.home/'mcp.json';write_private(self.mcp,json.dumps({'mcpServers':{'langbench':{'command':command[0],'args':command[1:]}}}))
-        self.settings=self.home/'settings.json';write_private(self.settings,json.dumps({'disableAllHooks':True,'autoMemoryEnabled':False,'enabledPlugins':{},'effortLevel':EFFORT,'permissions':{'allow':[TOOL],'defaultMode':'dontAsk'}}))
+        self.settings=self.home/'settings.json';write_private(self.settings,json.dumps({'disableAllHooks':True,'autoMemoryEnabled':False,'enabledPlugins':DISABLED_PLUGINS,'effortLevel':EFFORT,'permissions':{'allow':[TOOL],'defaultMode':'dontAsk'}}))
         self.identity={'provider':'claude','model':MODEL,'effort':EFFORT,'version':VERSION,'binary_sha256':BINARY_SHA,
             'auth_mode':'canonical_subscription_oauth','endpoint':ENDPOINT,'tool':TOOL,'policy_version':'claude-mcp-only-v1',
             'settings':json.loads(self.settings.read_text()),'environment':{k:v for k,v in self.env.items() if k!='HOME'}}
