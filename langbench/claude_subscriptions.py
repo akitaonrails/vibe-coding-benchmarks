@@ -73,19 +73,25 @@ def inspect_request(body, headers):
             'stream': body.get('stream')}
 
 
+def proven_unsent(request):
+    return (request.get('upstream_sent') is False and request.get('response_ids')==[]
+            and request.get('usage')=={} and request.get('message_stopped') is not True
+            and request.get('http_status') in (None,429))
+
+
 def native_usage(request):
     raw = request.get('usage', {})
     fields = ('input_tokens', 'cache_read_input_tokens', 'cache_creation_input_tokens', 'output_tokens')
     valid = all(type(raw.get(name)) is int and raw[name] >= 0 for name in fields)
     identity_valid = request.get('model')==MODEL and request.get('effort')==EFFORT and request.get('tool_names')==[TOOL] and request.get('auth_mode')=='oauth_bearer'
-    complete = valid and identity_valid and request.get('message_stopped') is True and request.get('response_complete') is True and request.get('http_status') == 200
+    complete = valid and identity_valid and request.get('upstream_sent') is not False and request.get('message_stopped') is True and request.get('response_complete') is True and request.get('http_status') == 200
     return {'parser_version':'claude-messages-v1', 'provider':'claude',
             'request_id':'transport-'+str(request['index']), 'raw':raw, 'scope':'request',
             'components':{'input':raw.get(fields[0]), 'cache_read':raw.get(fields[1]),
                           'cache_write':raw.get(fields[2]), 'output_including_reasoning':raw.get(fields[3]), 'reasoning':None},
             'cli_normalized_total':None, 'provider_reported_total':sum(raw[n] for n in fields) if complete else None,
             'native_fields_verified':complete, 'request_coverage_verified':complete, 'valid':valid,
-            'native_response_observed':identity_valid and request.get('http_status')==200,
+            'native_response_observed':identity_valid and request.get('upstream_sent') is not False and request.get('http_status')==200,
             'mapping':'Native disjoint uncached input, cache read, cache creation, output. Thinking is included in output; no separate inference.'}
 
 
@@ -140,13 +146,25 @@ class ClaudeTransport:
                     if len(data)!=length: raise ValueError('incomplete request')
                     body=json.loads(data); evidence=inspect_request(body, dict(self.headers))
                     evidence.update(index=len(owner.records), started_at=time.time(), usage={}, response_ids=[],
-                                    admission_wait_seconds=admission_wait)
+                                    admission_wait_seconds=admission_wait,upstream_sent=False)
                     owner.records.append(evidence)
                     if owner.rate_latched:
                         evidence.update(http_status=429, upstream_sent=False, quota_retry_blocked=True)
                         self.send_error(429); return
                     if not owner.allowance_checked:
-                        owner.check_allowance(self.headers['Authorization'])
+                        preflight_started=time.monotonic()
+                        try:
+                            owner.check_allowance(self.headers['Authorization'])
+                            evidence['allowance_preflight_http_status']=200
+                        except urllib.error.HTTPError as error:
+                            evidence['allowance_preflight_http_status']=error.code
+                            evidence['allowance_preflight_error_type']='HTTPError'
+                            raise
+                        except Exception as error:
+                            evidence['allowance_preflight_error_type']=type(error).__name__
+                            raise
+                        finally:
+                            evidence['allowance_preflight_seconds']=time.monotonic()-preflight_started
                     if owner.rate_latched:
                         evidence.update(http_status=429, upstream_sent=False, quota_preflight_stop=True)
                         self.send_error(429); return
@@ -368,7 +386,13 @@ class ClaudeCLI:
             invocation['parse_error']=type(error).__name__
             invocation['deadline_reached']=raw['termination'] in ('timeout','candidate_timeout')
         if errors and invocation['status'] not in ('timeout','quota'): invocation['status']='infrastructure_error'
-        invocation['usage_records']=[native_usage(r) for r in invocation['request_records']]
+        inference_records=[r for r in invocation['request_records'] if not proven_unsent(r)]
+        invocation['operational_request_count']=len(invocation['request_records'])
+        invocation['proven_unsent_request_count']=len(invocation['request_records'])-len(inference_records)
+        invocation['allowance_preflight_seconds']=sum(r.get('allowance_preflight_seconds',0) for r in invocation['request_records'])
+        if not inference_records and any(r.get('allowance_preflight_error_type') for r in invocation['request_records']):
+            invocation.update(status='infrastructure_error',failure_phase='allowance_preflight')
+        invocation['usage_records']=[native_usage(r) for r in inference_records]
         invocation['usage_coverage_verified']=bool(invocation['usage_records']) and not self.transport.fatal and all(r['request_coverage_verified'] for r in invocation['usage_records'])
         persist(directory/'invocation.json',invocation)
         return invocation
@@ -495,13 +519,17 @@ def run_claude(task,language,output,*,provider='claude',model=MODEL,effort=EFFOR
 
 def reconcile_claude_usage(invocations):
     """Deduplicate native response identities and preserve incomplete observations."""
-    grouped={};issues=[];unidentified=[];observed_count=0
+    grouped={};issues=[];unidentified=[];observed_count=0;unsent_count=0
     covered=bool(invocations)
     for invocation in invocations:
         requests=invocation.get('request_records',[])
         if not requests or invocation.get('usage_coverage_verified') is not True: covered=False
         for request in requests:
             observed_count+=1
+            if proven_unsent(request):
+                unsent_count+=1;continue
+            if request.get('upstream_sent') is False:
+                covered=False;issues.append({'kind':'contradictory_unsent_record','index':request.get('index')})
             ids=request.get('response_ids',[])
             if len(ids)!=1 or not isinstance(ids[0],str) or not ids[0]:
                 covered=False;issues.append({'kind':'missing_or_invalid_response_identity','index':request.get('index')})
@@ -527,7 +555,7 @@ def reconcile_claude_usage(invocations):
     components['reasoning']=None
     return {'parser_version':'claude-messages-v2','total':sum(known) if complete else None,
             'known_subtotal':sum(known) if known else None,'complete':complete,
-            'request_count':len(grouped)+len(unidentified),'observed_record_count':observed_count,
+            'request_count':len(grouped)+len(unidentified),'observed_record_count':observed_count,'operational_request_count':observed_count,'proven_unsent_request_count':unsent_count,
             'deduplicated_records':duplicates,'components':components,'issues':issues,
             'identity_conflicts':[i for i in issues if i['kind']=='conflicting_response_identity'],
             'observed_component_lower_bounds':observed_components,

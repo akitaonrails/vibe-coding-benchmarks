@@ -219,6 +219,65 @@ class ClaudeTests(unittest.TestCase):
         finally:
             transport.close()
 
+    def test_verified_unsent_preflight_excluded_but_unknown_not_excluded(self):
+        unsent={'index':0,'upstream_sent':False,'response_ids':[],'usage':{},'allowance_preflight_http_status':429}
+        inv={'request_records':[unsent,request(1)],'usage_coverage_verified':True}
+        result=c.reconcile_claude_usage([inv])
+        self.assertTrue(result['complete']);self.assertEqual(result['total'],100)
+        self.assertEqual(result['proven_unsent_request_count'],1)
+        self.assertEqual(result['operational_request_count'],2);self.assertEqual(result['request_count'],1)
+        unknown={k:v for k,v in unsent.items() if k!='upstream_sent'}
+        self.assertFalse(c.reconcile_claude_usage([{**inv,'request_records':[unknown,request(1)]}])['complete'])
+        contradiction={**request(),'upstream_sent':False}
+        result=c.reconcile_claude_usage([{**inv,'request_records':[contradiction]}])
+        self.assertFalse(result['complete']);self.assertEqual(result['proven_unsent_request_count'],0)
+        self.assertIsNone(result['known_subtotal']);self.assertIsNone(result['known_token_lower_bound'])
+
+    def test_preflight_http_error_records_status_not_coding_quota(self):
+        class Response(io.BytesIO):
+            status=200;headers={'Content-Type':'text/event-stream'}
+        class Opener:
+            def __init__(self):self.calls=[]
+            def open(self,req,**kwargs):
+                self.calls.append(req.full_url)
+                if req.full_url.endswith('/api/oauth/usage'):
+                    if len(self.calls)==1:raise urllib.error.HTTPError(req.full_url,429,'fixture only',{},None)
+                    return Response(b'{"extra_usage":{"is_enabled":false},"five_hour":{"utilization":1},"seven_day":{"utilization":97}}')
+                return Response(b'data: {"type":"message_stop"}\n\n')
+        opener=Opener();transport=c.ClaudeTransport(opener)
+        def send():
+            req=urllib.request.Request(transport.base_url+'/v1/messages',data=json.dumps(body()).encode(),headers={'Authorization':'Bearer sk-ant-oat-fixture'})
+            try:
+                with urllib.request.urlopen(req,timeout=2) as response:response.read();return response.status
+            except urllib.error.HTTPError as error:return error.code
+        try:
+            self.assertEqual(send(),502)
+            self.assertTrue(c.proven_unsent(transport.records[0]))
+            self.assertEqual(transport.records[0]['allowance_preflight_http_status'],429)
+            self.assertEqual(transport.records[0]['allowance_preflight_error_type'],'HTTPError')
+            self.assertGreaterEqual(transport.records[0]['allowance_preflight_seconds'],0)
+            self.assertFalse(transport.rate_latched);self.assertIsNone(transport.fatal)
+            self.assertEqual(send(),200)
+            self.assertIs(transport.records[1]['upstream_sent'],True)
+            self.assertEqual(opener.calls.count(c.ENDPOINT),1)
+        finally:transport.close()
+
+    def test_preflight_only_timeout_is_infrastructure(self):
+        with tempfile.TemporaryDirectory() as d:
+            adapter=self.fake_adapter(d);adapter.transport.records=[]
+            def process(*args,**kwargs):
+                if 'auth' in args[0]:
+                    return {'stdout':json.dumps({'authMethod':'claude.ai','apiProvider':'firstParty','subscriptionType':'max'}),'returncode':0}
+                adapter.transport.records.append({'index':0,'upstream_sent':False,'response_ids':[],'usage':{},
+                    'allowance_preflight_http_status':429,'allowance_preflight_error_type':'HTTPError','allowance_preflight_seconds':1.5})
+                return {'stdout':'','stderr':'','returncode':-9,'termination':'timeout','seconds':2}
+            with patch.object(c,'bounded_process',side_effect=process):result=adapter.invoke('task','session',2)
+            self.assertEqual(result['status'],'infrastructure_error')
+            self.assertEqual(result['failure_phase'],'allowance_preflight')
+            self.assertEqual(result['allowance_preflight_seconds'],1.5)
+            self.assertEqual(result['proven_unsent_request_count'],1)
+            self.assertFalse(result['usage_records'])
+
     def test_allowance_extra_usage_denied(self):
         class Response(io.BytesIO):status=200
         t=c.ClaudeTransport.__new__(c.ClaudeTransport)
