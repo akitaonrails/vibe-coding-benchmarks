@@ -1,5 +1,7 @@
 # Languages benchmark: research, protocol and implementation
 
+**Start here:** [setup/tutorial](setup.md), [results at a glance](results-summary.md), and [published data and evidence limits](data/README.md).
+
 Research began on 2026-10-10. The seven-language ledger campaign now has terminal records for all 112 planned attempts across Kimi K3 high, OpenCode/GLM 5.3 high, Opus 5.5 medium and Sol medium. There are 93 correct artifacts: 77 normal correct completions and 16 correct deadline snapshots. Twelve saved artifacts failed (including three Opus infrastructure incidents), and seven final grades are unavailable. These are exploratory results from one task instance with two repetitions per language/model/test condition, not a confirmed typing hierarchy or a frontier-difficulty qualification.
 
 Start with [the four-cohort results and limitations](followup-matrix-results.md), [follow-up language/condition effort tables](followup-language-effort.md), and [the original 56-attempt results](subscription-matrix-results.md). Native token totals, source sizes, tool activity, missing evidence and operational incidents remain separately visible.

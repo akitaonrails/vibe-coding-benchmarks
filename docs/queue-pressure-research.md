@@ -242,9 +242,9 @@ After the Kimi K3 / OpenCode GLM 5.3 matrix, repeat the exact matrix with
 Opus 5.5 medium and Sol medium only if subscription quota permits; disclose
 missing or incomplete cells rather than substituting models silently.
 
-Phase1 decision requested: accept this research protocol for later queue work.
-The immediate next implementation priority is the remaining language/model coding
-matrix; this proposal does not authorize or schedule a new queue load campaign.
+Publication status: this remains a research protocol for future queue work.
+The separate 112-attempt coding matrix is now [complete](results-summary.md);
+the stronger queue pressure campaign has not been implemented or run.
 Before future pressure-harness coding, freeze the sink/publication protocol,
 measurement schema and initial SLOs. An optional bounded diagnostic could compare
 one direct-to-sink durable run with a broker-only control; it is not required

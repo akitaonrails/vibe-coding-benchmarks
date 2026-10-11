@@ -95,7 +95,7 @@ The analysis retains 1 explicit operation record, 4 classification overrides and
 
 This is one multi-module maintenance task with two repetitions per cell. Its frontier-level difficulty remains unqualified; correctness ceilings in several cells and large self-authored validation effort are both relevant calibration findings. Seven language labels are not a one-dimensional typing scale, and the submitted code may not exercise each language’s strongest guarantees. No general law of diminishing returns, typing superiority or test equivalence is established here.
 
-The historical Astra smoke and separate queue reference/runtime experiments are not pooled into these statistics. A later non-inference check found the exact Sol medium route available, but this cohort contains no Sol attempts. The later exact Opus 5.5 medium and Sol medium cohorts still require their own qualified adapters and usable subscription allowance; the wider project is not complete.
+The historical Astra smoke and separate queue reference/runtime experiments are not pooled into these statistics. A later non-inference check found the exact Sol medium route available, but this cohort contains no Sol attempts. The later exact Opus 5.5 medium and Sol medium cohorts are now closed and reported [separately](followup-matrix-results.md); their results do not change this original cohort.
 
 ## Reproducible evidence
 

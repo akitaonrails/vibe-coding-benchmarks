@@ -1,145 +1,40 @@
-# Languages benchmark
+# Vibe Coding Benchmarks
 
-A controlled experiment on how programming-language checks and supplied tests affect AI coding correctness and effort. The ledger task supports Rust, Haskell, C#, Kotlin, TypeScript, Python and Ruby. The original Ruby/Rust smoke controls remain separate.
+An exploratory benchmark of AI coding correctness and effort across Rust, Haskell, C#, Kotlin, TypeScript, Python and Ruby, with and without supplied tests. A separate queue track compares Elixir, Rust, Rails and plain Ruby.
 
-Read [the research and protocol](docs/README.md) for the hypotheses, experimental controls and analysis limits. Crash-store recovery and protocol migration are compact smoke controls. The larger ledger-engine task is a calibration candidate; none is established as a frontier benchmark. See [the size and difficulty audit](docs/difficulty-audit.md).
+**Start here:** [setup and tutorial](docs/setup.md) · [results at a glance](docs/results-summary.md) · [documentation index](docs/README.md)
 
-## Local development
+## Completed ledger experiment
 
-The controller uses Python 3.11+ and its standard library. Native validation needs Ruby and Rust/Cargo. Candidate grading additionally requires Docker on Linux. Dependency fetching belongs to environment setup; candidate execution is offline.
+112 attempts: seven languages × four model/agent configurations × two test conditions × two repetitions of one ledger task. Correct means passing all 43 private grading histories.
+
+| Configuration | Normal correct | Correct at deadline | Failed artifact | No final grade |
+|---|---:|---:|---:|---:|
+| Kimi K3 high | 17 | 7 | 2 | 2 |
+| OpenCode / GLM 5.3 high | 7 | 9 | 7 | 5 |
+| Claude / Opus 5.5 medium | 25 | 0 | 3 infrastructure-interrupted | 0 |
+| Codex / Sol medium | 28 | 0 | 0 | 0 |
+
+**No general language ranking is established.** Opus and Sol passed every eligible attempt, so this task was insufficiently difficult to distinguish their correctness. Supplied tests accompanied more correct artifacts for Kimi/GLM. Tokens, missing data, provider delays and harness changes limit comparisons.
+
+- [Full analysis](docs/followup-matrix-results.md), [language/test-condition effort tables](docs/followup-language-effort.md), and [Kimi/GLM results](docs/subscription-matrix-results.md)
+- [Published per-attempt measurements](docs/data/matrix-results.json) and [evidence/reproduction limits](docs/data/README.md)
+- [Experimental design](docs/benchmark-design.md), [difficulty audit](docs/difficulty-audit.md), and [task catalog](docs/task-catalog.md)
+
+## Queue experiment
+
+Eight 10,000-message reference trials created real backlog, but shared infrastructure and timeout effects prevented a sustainable-capacity ranking. Controlled AI coding effort for Elixir versus Rust/Rails has **not** been measured. The stronger pressure protocol is proposed, not executed.
+
+Read [queue results](docs/scalability-load-validation.md), [pressure research](docs/queue-pressure-research.md), and [queue setup](docs/setup.md#queue-runtime-trials).
+
+## Try it without a model account
+
+From a checkout with Python 3.11+:
 
 ```sh
 python3 -m langbench list
-python3 -m langbench plan
-python3 -m unittest discover -s tests -v
+python3 -m langbench prepare ledger_engine ruby .work/ruby-t1 --tests T1
+python3 scripts/export_public_results.py --summary docs/data/matrix-results.json
 ```
 
-Prepare an isolated task bundle with or without supplied behavioral tests:
-
-```sh
-python3 -m langbench prepare protocol_migration ruby .work/ruby-t1 --tests T1
-python3 -m langbench prepare protocol_migration rust .work/rust-t0 --tests T0
-```
-
-Each destination must be new. T0 receives the same public contract and working transport as T1, but no supplied behavioral cases. Agents may create their own tests in both conditions. Preparation does not run an LLM.
-
-Grade a submission using trusted build scaffolding and private cases:
-
-```sh
-python3 -m langbench grade protocol_migration ruby .work/ruby-t1
-python3 -m langbench selftest
-```
-
-A starter intentionally does not implement all requested behavior, so its grade should fail. `selftest` grades the known-good references; it measures the grader/environment, not model capability. Real candidate execution must use the isolated backend. Results directories and scratch work are ignored by Git.
-
-## Seven-language effort matrix
-
-The first subscription cohort completed 56 ledger attempts using Kimi K3 and
-OpenCode/GLM 5.3, T0/T1 and two repetitions. Read the
-[complete results and effort analysis](docs/subscription-matrix-results.md).
-All languages use one pinned offline image.
-At most two short nudges are permitted after an explicit incomplete handoff;
-completed attempts are not reopened to equalize work. Initial results, actual
-nudges, request-level tokens, observed repair cycles, setup/grading time and
-operator interventions remain separate. Unknown human repair time stays unknown.
-
-Read [the effort protocol](docs/matrix-effort-protocol.md),
-[native runtime evidence](docs/seven-language-implementation.md) and
-[subscription adapter evidence](docs/subscription-implementation.md).
-One ledger task remains exploratory rather than a general language ranking.
-
-```sh
-python3 -m langbench selftest --runtime seven
-python3 -m langbench matrix-plan > .work/subscription-plan.json
-# Requires passed, current external subscription qualification receipts:
-python3 -m langbench matrix-run .work/subscription-plan.json results/subscription-matrix --kimi-qualification results/subscription-qualification-kimi-final/qualification.json --opencode-qualification results/subscription-qualification-opencode-final/qualification.json
-python3 scripts/analyze_subscription_matrix.py results/subscription-matrix results/new-analysis
-```
-
-The runner freezes inputs before inference, preserves every consumed attempt and
-records unrun/quota cells. Resume verifies the frozen inputs and never silently
-retries a consumed cell. The standalone analyzer distinguishes normal completion,
-correct deadline artifacts, output limits and unknown correctness. Its simple
-repair-cycle classifier has no coverage on the first cohort's compound commands;
-use the documented trace audits rather than interpreting zero cycles as no work.
-
-[Separate Opus/Sol cohorts](docs/later-model-matrix.md) retain the same 28 cells
-per model and use qualified adapters plus the versioned source-retention fix.
-Their subscription availability was checked only after the first cohort closed.
-Live qualification and collection status are recorded separately from the first
-cohort results.
-
-## Historical Codex subscription smoke tests
-
-The implemented adapter pins Codex app-server 0.156.0 and records hashes of both
-its binary and Code Mode companion. It requires an existing ChatGPT subscription
-sign-in, exact requested model/effort availability, and a passing capability probe.
-Candidate shell commands run offline in Docker; private grading follows model and
-worker shutdown. See [implementation evidence and limitations](docs/implementation.md).
-
-```sh
-python3 -m langbench qualify results/qualification --model gpt-6-astra --effort low
-python3 -m langbench run protocol_migration ruby results/ruby-t1 --tests T1 --model gpt-6-astra --effort low --base-seconds 180 --continuation-seconds 60
-python3 -m langbench report results/ruby-t1/result.json
-```
-
-`qualify` and `run` accept `--binary /path/to/codex`; its matching
-`codex-code-mode-host` must be alongside it. These commands consume subscription
-inference. All four bounded Ruby/Rust × T0/T1 smoke cells passed the 44-case F4 grading
-suite at their initial checkpoint and after both nudges; the suite includes 20
-public and 24 withheld cases. This is development qualification, not evidence for
-a language ranking. Two subsequent Astra-low T1 ledger trials also passed initially; the full six-cell calibration and legacy 48-cell smoke plans have not been launched. See [ledger calibration evidence](docs/ledger-calibration.md). The observed three-minute initial budget was a toolchain smoke budget. Two fixed generic nudges get
-separate snapshots. Request-level provider counts reconcile for these pinned traces (cached input
-included; not billing or invisible compute). Generic token accounting remains
-unqualified, and a worker timeout that
-loses its artifact is infrastructure-invalid rather than a measured task failure.
-
-Execute a bounded prefix of a generated development plan:
-
-```sh
-mkdir -p .work
-python3 -m langbench plan > .work/calibration-plan.json
-python3 -m langbench batch .work/calibration-plan.json results/calibration --limit 2
-```
-
-`plan` defaults to ledger-engine calibration. Use `plan --purpose smoke` for the legacy 48-cell control matrix. A single ledger instance cannot establish frontier difficulty.
-
-The prefix follows randomized plan order and need not contain paired cells. The
-runner validates and freezes the selected plan, records durable progress, and
-stops on infrastructure/quota incidents without retries. No batch or full pilot
-has been launched. See the implementation document before selecting larger runs.
-
-## Queue scalability track
-
-A separate real RabbitMQ experiment compares Elixir/OTP/Broadway, Rust/Tokio/Lapin,
-Rails/Bunny and a plain Ruby/Bunny control. It tests bounded concurrency, durable
-completion, lost responses, poison messages, process/broker recovery and shutdown.
-Further discriminating pressure is planned in [the pressure research](docs/queue-pressure-research.md). Read [the design](docs/scalability-benchmark.md) and
-[implementation status](docs/scalability-implementation.md), and
-[sustained workload evidence](docs/scalability-load-validation.md). These reference
-qualifications do not establish AI coding effort or sustainable capacity.
-
-```sh
-python3 -m scalability.runner setup
-docker build -t langbench-queue-elixir:reference scalability/workers/elixir/reference
-python3 -m scalability.runner run langbench-queue-elixir:reference results/queue-clean --scenario clean
-```
-
-## Contents
-
-- `langbench/`: bundle preparation, process supervision, grading, manifests, event accounting, fixed-nudge collection and descriptive reports.
-- `tasks/crash_store/`: logical page publication, durable snapshots, capacity pressure and interrupted reclamation.
-- `tasks/protocol_migration/`: working v1 service to migrate across wire/domain/repository/worker boundaries; scoped IDs, authorization, absent/null values, cancellation and retry generations.
-- `tasks/ledger_engine/`: snapshot transactions, conflict validation, durable journal replay and checkpoint migration; a difficulty calibration candidate.
-- `scalability/`: isolated RabbitMQ runner, durable sink, fault injection and four native stack fixtures.
-- `tests/`: oracle anchors, Ruby/Rust parity, semantic mutants and instrumentation/boundary tests.
-- `configs/`: pilot roster and execution budgets. A generated plan is not an instruction to launch the full matrix.
-- `docs/`: research, protocol, task designs, rollout and implementation evidence.
-
-References and private cases are controller-side assets. Never mount this repository wholesale into a candidate environment. Candidate bundles contain only the selected starter, contract and condition-appropriate public support. Submitted `src/` is overlaid onto a trusted scaffold for grading; submitted launcher/config changes cannot replace the grader's build policy.
-
-## Interpretation
-
-Compilation success is not behavioral success. Token totals remain unknown when event scope or reasoning-token overlap has not been qualified. An initial result is preserved before any eligible nudges; every continuation contributes to reported effort. Private outcomes must never determine when a nudge is sent.
-
-Reference results, synthetic event tests and small live smoke tests serve different purposes. None alone establishes that one language is better or that a supplied suite substitutes for static checking. Full scored collection remains subject to the preregistration and qualification gates in the research plan.
+Preparation does not run a model. Grading needs the qualified Docker runtime; live collection additionally needs pinned CLIs and your own subscriptions. Follow the [tutorial](docs/setup.md) before launching a matrix. Raw local traces, credentials and Docker images are not included in this repository.

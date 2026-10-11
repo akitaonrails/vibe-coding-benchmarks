@@ -1,5 +1,7 @@
 # Codex subscription harness plan
 
+References to `~/Projects/llm-coding-benchmark` identify a separate read-only local checkout, not files distributed with this repository.
+
 Research/design only. No model jobs were launched and no credentials were read or modified for this review. Reference project reads were confined to documentation and source. Installed CLI observed on 2026-10-10: `codex-cli 0.156.0`.
 
 ## Verified interfaces and remaining qualification
@@ -99,11 +101,11 @@ Proposed result fields include validity and reason; all invocation/thread/parent
 
 | Read-only reference | Useful part | Required change here |
 |---|---|---|
-| [runner.py](../../llm-coding-benchmark/scripts/benchmark/runner.py), `build_codex_command`, `extract_codex_metrics`, `stream_process_output` | JSON event parsing, thread capture, timestamps/process handling, absolute paths | Persist and resume sessions; independently qualify token scope and reasoning overlap; partial-failure telemetry; fixture tests for duplicates |
-| [Codex integration notes](../../llm-coding-benchmark/docs/codex-integration.md) | Documents stdin, path and shell-wrapper pitfalls | Historical API-key/ephemeral notes are not the new subscription design |
-| [frontier_native.py](../../llm-coding-benchmark/scripts/frontier_native.py) | Existing subscription-mode checks and environment boundary probes | Avoid hardcoded credential-storage assumptions; deepen isolation checks; keep secrets outside archived output |
-| [v4.1 frontier runner](../../llm-coding-benchmark/scripts/run_v41_frontier.py) and [tests](../../llm-coding-benchmark/scripts/test_v41_frontier.py) | Entry points for implementation follow-up | Review fully before adapting; not claimed audited by this research pass |
-| [v5 design](../../llm-coding-benchmark/benchmark-v5/DESIGN.md) | Paired assistance controls, independent grading, budgets and failure taxonomy | Main nudge dispatch independent of private grades; add language/checker/test factorials |
+| runner.py (reference checkout: `~/Projects/llm-coding-benchmark/scripts/benchmark/runner.py`), `build_codex_command`, `extract_codex_metrics`, `stream_process_output` | JSON event parsing, thread capture, timestamps/process handling, absolute paths | Persist and resume sessions; independently qualify token scope and reasoning overlap; partial-failure telemetry; fixture tests for duplicates |
+| Codex integration notes (reference checkout: `~/Projects/llm-coding-benchmark/docs/codex-integration.md`) | Documents stdin, path and shell-wrapper pitfalls | Historical API-key/ephemeral notes are not the new subscription design |
+| frontier_native.py (reference checkout: `~/Projects/llm-coding-benchmark/scripts/frontier_native.py`) | Existing subscription-mode checks and environment boundary probes | Avoid hardcoded credential-storage assumptions; deepen isolation checks; keep secrets outside archived output |
+| v4.1 frontier runner (reference checkout: `~/Projects/llm-coding-benchmark/scripts/run_v41_frontier.py`) and tests (reference checkout: `~/Projects/llm-coding-benchmark/scripts/test_v41_frontier.py`) | Entry points for implementation follow-up | Review fully before adapting; not claimed audited by this research pass |
+| v5 design (reference checkout: `~/Projects/llm-coding-benchmark/benchmark-v5/DESIGN.md`) | Paired assistance controls, independent grading, budgets and failure taxonomy | Main nudge dispatch independent of private grades; add language/checker/test factorials |
 
 The reference adapter includes a specific note about a secret-redaction mechanism corrupting ordinary output digits. Add a redaction fidelity fixture: nonsecret literals, hashes and score values must survive unchanged. Redact known secret values and structured secret fields, not generic numeric flags. This plan changes nothing in the reference repository.
 

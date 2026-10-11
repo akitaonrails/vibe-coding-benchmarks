@@ -1,5 +1,7 @@
 # Research findings
 
+References to `~/Projects/llm-coding-benchmark` identify a separate read-only local checkout, not files distributed with this repository.
+
 As of 2026-10-10. This is a targeted research review, not a systematic literature review or a claim that no other relevant studies exist. Separate published findings, local observations and proposed experimental choices.
 
 ## What the existing evidence supports
@@ -45,10 +47,10 @@ The first four could improve efficiency; the last can offset it. Compiler failur
 
 Read-only sources inspected:
 
-- [v4.1 overview](../../llm-coding-benchmark/benchmark-v4.1/README.md).
-- [Frontier comparison](../../llm-coding-benchmark/docs/success_report.v4_1.frontier_comparison.md) and [gap analysis](../../llm-coding-benchmark/benchmark-v4.1/frontier/gap_analysis.md).
-- [v5 design](../../llm-coding-benchmark/benchmark-v5/DESIGN.md).
-- [Codex integration notes](../../llm-coding-benchmark/docs/codex-integration.md), [runner implementation](../../llm-coding-benchmark/scripts/benchmark/runner.py), and [native subscription adapter](../../llm-coding-benchmark/scripts/frontier_native.py).
+- v4.1 overview (reference checkout: `~/Projects/llm-coding-benchmark/benchmark-v4.1/README.md`).
+- Frontier comparison (reference checkout: `~/Projects/llm-coding-benchmark/docs/success_report.v4_1.frontier_comparison.md`) and gap analysis (reference checkout: `~/Projects/llm-coding-benchmark/benchmark-v4.1/frontier/gap_analysis.md`).
+- v5 design (reference checkout: `~/Projects/llm-coding-benchmark/benchmark-v5/DESIGN.md`).
+- Codex integration notes (reference checkout: `~/Projects/llm-coding-benchmark/docs/codex-integration.md`), runner implementation (reference checkout: `~/Projects/llm-coding-benchmark/scripts/benchmark/runner.py`), and native subscription adapter (reference checkout: `~/Projects/llm-coding-benchmark/scripts/frontier_native.py`).
 
 The v4.1 overview reports that Genesys, Astra and Fable all scored 100 on its original replicated store, transactional engine and typed-language tasks. Its harder extension reports filesystem scores around 41/27/99, Lean checker scores 0/98/98, and optimization scores 0/0/26 respectively. These are heterogeneous, single-attempt scores with different native harnesses, not language-treatment evidence. This review inspected summaries and adapter code; it did not regrade the underlying submissions.
 
