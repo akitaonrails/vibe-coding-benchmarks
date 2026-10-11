@@ -26,7 +26,16 @@ A separate [queue scalability and reliability track](scalability-benchmark.md) t
 
 ## Current subscription expansion
 
+- [Complete 56-attempt results](subscription-matrix-results.md), including source sizes and measurement limits
+- [Matched language effort traces](subscription-language-effort-audit.md) and [semantic failure audit](subscription-semantic-failure-audit.md)
+- [Separate exact Opus/Sol cohorts](later-model-matrix.md) and [source-retention correction](artifact-retention-validation.md)
 - [Coding effort and intervention protocol](matrix-effort-protocol.md)
 - [Subscription adapter design](subscription-adapters.md) and [implementation evidence](subscription-implementation.md)
 - [Seven-language expansion](seven-language-expansion.md) and [runtime validation](seven-language-implementation.md)
 - [Further queue pressure research](queue-pressure-research.md)
+
+The later subscription instructions superseded the initial model roster for this
+campaign: Kimi K3 high and OpenCode/GLM 5.3 high ran first, followed conditionally
+by exact Opus 5.5 medium and Sol medium. Historical Astra smoke results remain
+separate. The current assistance policy uses eligible visible incomplete handoffs;
+it does not force two nudges on every attempt.

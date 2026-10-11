@@ -68,6 +68,14 @@ def _atomic_json(path, value):
 
 
 def run_matrix(plan_file, destination, *, qualifications, resume=False, runner=None, binding=None):
+    return _run_matrix(plan_file, destination, qualifications=qualifications,
+                       resume=resume, runner=runner, binding=binding,
+                       plan_validator=validate_plan, providers=PROVIDERS,
+                       kind='subscription_matrix')
+
+
+def _run_matrix(plan_file, destination, *, qualifications, resume=False, runner=None,
+                binding=None, plan_validator, providers, kind):
     """Run remaining cells once. Resume never reopens started/finished attempts.
 
     Qualifications are provider -> receipt path. Provider validates its own live
@@ -78,9 +86,9 @@ def run_matrix(plan_file, destination, *, qualifications, resume=False, runner=N
         raise ValueError('plan too large')
     raw = source.read_bytes()
     plan = json.loads(raw)
-    cells = validate_plan(plan)
-    if set(qualifications) != set(PROVIDERS):
-        raise ValueError('both provider qualification receipts required')
+    cells = plan_validator(plan)
+    if set(qualifications) != set(providers):
+        raise ValueError('exact design provider qualification receipts required')
     qualification_data = {}
     qualification_hashes = {}
     for provider, path in qualifications.items():
@@ -94,7 +102,7 @@ def run_matrix(plan_file, destination, *, qualifications, resume=False, runner=N
     plan_hash = hashlib.sha256(raw).hexdigest()
     if resume:
         state = json.loads((output / 'matrix.json').read_text())
-        if (state['plan_sha256'] != plan_hash or sha256(output / 'plan.json') != plan_hash
+        if (state.get('kind') != kind or state['plan_sha256'] != plan_hash or sha256(output / 'plan.json') != plan_hash
                 or state['qualification_sha256'] != qualification_hashes
                 or state['input_binding'] != frozen_inputs):
             raise ValueError('frozen plan or qualification changed')
@@ -109,7 +117,7 @@ def run_matrix(plan_file, destination, *, qualifications, resume=False, runner=N
     else:
         output.mkdir(parents=True, exist_ok=False)
         (output / 'plan.json').write_bytes(raw)
-        state = dict(schema_version=2, kind='subscription_matrix', plan_sha256=plan_hash,
+        state = dict(schema_version=2, kind=kind, plan_sha256=plan_hash,
                      qualification_sha256=qualification_hashes, input_binding=frozen_inputs, state='running',
                      execution='sequential', blocked_providers=[],
                      cells=[dict(id=c['id'], state='pending') for c in cells])

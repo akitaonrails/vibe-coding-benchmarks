@@ -34,8 +34,10 @@ A starter intentionally does not implement all requested behavior, so its grade 
 
 ## Seven-language effort matrix
 
-The new subscription track uses Kimi K3 and OpenCode/GLM 5.3, T0/T1 and two
-repetitions: 56 fresh ledger attempts. All languages use one pinned offline image.
+The first subscription cohort completed 56 ledger attempts using Kimi K3 and
+OpenCode/GLM 5.3, T0/T1 and two repetitions. Read the
+[complete results and effort analysis](docs/subscription-matrix-results.md).
+All languages use one pinned offline image.
 At most two short nudges are permitted after an explicit incomplete handoff;
 completed attempts are not reopened to equalize work. Initial results, actual
 nudges, request-level tokens, observed repair cycles, setup/grading time and
@@ -51,13 +53,21 @@ python3 -m langbench selftest --runtime seven
 python3 -m langbench matrix-plan > .work/subscription-plan.json
 # Requires passed, current external subscription qualification receipts:
 python3 -m langbench matrix-run .work/subscription-plan.json results/subscription-matrix --kimi-qualification results/subscription-qualification-kimi-final/qualification.json --opencode-qualification results/subscription-qualification-opencode-final/qualification.json
-python3 -m langbench effort-report results/subscription-matrix
+python3 scripts/analyze_subscription_matrix.py results/subscription-matrix results/new-analysis
 ```
 
 The runner freezes inputs before inference, preserves every consumed attempt and
 records unrun/quota cells. Resume verifies the frozen inputs and never silently
-retries a consumed cell. Later Opus/Sol collection is conditional on their quota
-and exact model availability after the initial subscription matrix.
+retries a consumed cell. The standalone analyzer distinguishes normal completion,
+correct deadline artifacts, output limits and unknown correctness. Its simple
+repair-cycle classifier has no coverage on the first cohort's compound commands;
+use the documented trace audits rather than interpreting zero cycles as no work.
+
+[Separate Opus/Sol cohorts](docs/later-model-matrix.md) retain the same 28 cells
+per model and use qualified adapters plus the versioned source-retention fix.
+Their subscription availability was checked only after the first cohort closed.
+Live qualification and collection status are recorded separately from the first
+cohort results.
 
 ## Historical Codex subscription smoke tests
 

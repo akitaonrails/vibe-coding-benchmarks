@@ -8,7 +8,7 @@ import tempfile
 import time
 import uuid
 from .assistance import collect, persist, POLICY, STATUS_INSTRUCTION, terminal_status
-from .core import prepare,digest_tree,ROOT
+from .core import prepare,digest_tree,ROOT,copy_workspace
 from .grading import grade
 from .worker import DockerWorker
 from .provider_cli import ProviderCLI,ROUTES
@@ -28,7 +28,9 @@ def runtime_binding():
 
 
 def source_digest(worker):
-    if not worker.alive:return None
+    if not worker.alive:
+        retained=getattr(worker,'retained_source',None)
+        return digest_tree(retained/'src') if retained else None
     with tempfile.TemporaryDirectory(prefix='langbench-source-') as temporary:
         target=Path(temporary)/'export';worker.export(target)
         return digest_tree(target/'src')
@@ -41,10 +43,42 @@ def export_workspace(worker,workspace):
     temporary.rename(workspace)
 
 
+def capture_invocation(worker,workspace,invocation):
+    """Recover only a sealed terminal source; transport usage remains independent."""
+    if getattr(worker,'retention','legacy')=='seal-v1':
+        errors=invocation.get('cleanup_unsettled',[])
+        candidate_quiescent=not any(error.get('component')=='bridge' for error in errors)
+        if worker.alive and candidate_quiescent and (errors or invocation.get('status')=='timeout'):
+            worker.seal_quiescent()
+            worker.close()
+        if worker.retained_source is not None:
+            retained=worker.retained_source
+            expected=worker.retention_receipt['source_sha256']
+            if digest_tree(retained/'src')!=expected:raise RuntimeError('sealed source changed')
+            staged=workspace.with_name(workspace.name+'-sealed')
+            copy_workspace(workspace,staged)
+            shutil.rmtree(staged/'src')
+            shutil.copytree(retained/'src',staged/'src')
+            if digest_tree(staged/'src')!=expected:raise RuntimeError('sealed source copy mismatch')
+            shutil.rmtree(workspace);staged.rename(workspace)
+            invocation.update(artifact_available=True,artifact_retention=dict(worker.retention_receipt),
+                              artifact_kind='terminal_sealed')
+            return invocation
+        if worker.retention_receipt is not None:
+            invocation['artifact_retention']=dict(worker.retention_receipt)
+    if not invocation.get('quiescent',False):
+        worker.close();invocation['artifact_available']=False
+    elif worker.alive:
+        export_workspace(worker,workspace);invocation['artifact_available']=True
+    else:
+        invocation.update(status='timeout',artifact_available=False,error='candidate_worker_retired; final source unavailable')
+    return invocation
+
+
 def bound_identity(adapter,worker):
     return {'adapter':adapter.identity,'runtime':runtime_binding(),'worker':worker.qualification,
             'assistance_policy':POLICY,'schema_version':1,
-            'adapter_source_sha256':sha({name:hashlib.sha256(Path(__file__).with_name(name).read_bytes()).hexdigest() for name in ('subscriptions.py','provider_cli.py','provider_transport.py','mcp_bridge.py','assistance.py','provider_usage.py')})}
+            'adapter_source_sha256':sha({name:hashlib.sha256(Path(__file__).with_name(name).read_bytes()).hexdigest() for name in ('subscriptions.py','provider_cli.py','provider_transport.py','mcp_bridge.py','assistance.py','provider_usage.py','worker.py')})}
 
 
 def validate_qualification(qualification,identity):
@@ -54,7 +88,7 @@ def validate_qualification(qualification,identity):
         raise ValueError('qualification binding mismatch')
 
 
-def qualify_provider(provider,output,*,model,effort,binary=None,seconds=120):
+def qualify_provider(provider,output,*,model,effort,binary=None,seconds=120,retention='legacy'):
     """Two harmless subscription turns; separate from every coding attempt."""
     output=Path(output).absolute();output.mkdir(parents=True,exist_ok=False)
     receipt={'schema_version':1,'kind':'subscription_qualification','passed':False,'provider':provider,'model':model,'effort':effort,'invocations':[]}
@@ -64,7 +98,7 @@ def qualify_provider(provider,output,*,model,effort,binary=None,seconds=120):
         marker=uuid.uuid4().hex;canary=output/'host-canary';secret=uuid.uuid4().hex;canary.write_text(secret)
         command=f'test ! -e {str(canary)} && test ! -e /workspace/tasks && printf %s {marker} > /workspace/src/QUALIFIED'
         with ExitStack() as stack:
-            worker=stack.enter_context(DockerWorker(workspace,runtime='seven'))
+            worker=stack.enter_context(DockerWorker(workspace,runtime='seven',retention=retention))
             adapter=ProviderCLI(provider,output/'trace',lambda c,t:worker.execute(c,timeout=t,output_limit=256*1024),lambda:source_digest(worker),model=model,effort=effort,binary=binary)
             stack.callback(adapter.close)
             receipt['binding']=bound_identity(adapter,worker);receipt['binding_sha256']=sha(receipt['binding'])
@@ -87,13 +121,14 @@ def qualify_provider(provider,output,*,model,effort,binary=None,seconds=120):
             receipt['passed']=bool(all(receipt['checks'].values()) and executed and receipt['independent_host_canary_absent'] and second['status']=='handoff' and second['session_id']==first['session_id'] and (workspace/'src/QUALIFIED').read_text()==marker and canary.read_text()==secret and secret not in json.dumps(receipt))
             receipt['usage_summary']=summarize_invocations(receipt['invocations'])
     except Exception as error:
+        receipt['passed']=False
         receipt['error']=type(error).__name__+' (details suppressed to protect provider credentials)'
     persist(output/'qualification.json',receipt)
     return receipt
 
 
 def run_subscription(task,language,output,*,provider,model,effort,tests='T1',seed=0,replicate=1,block_id=None,
-                     base_seconds=900,continuation_seconds=180,qualification=None,binary=None):
+                     base_seconds=900,continuation_seconds=180,qualification=None,binary=None,retention='legacy'):
     if tests not in ('T0','T1') or type(seed) is not int or seed<0:raise ValueError('invalid treatment')
     if provider not in ROUTES or model!=ROUTES[provider]['model']:raise ValueError('invalid provider model')
     if not isinstance(qualification,dict) or qualification.get('passed') is not True:raise ValueError('external passed qualification is required')
@@ -107,7 +142,7 @@ def run_subscription(task,language,output,*,provider,model,effort,tests='T1',see
     try:
         workspace=output/'workspace';preparation=prepare(task,language,tests,workspace)
         with ExitStack() as stack:
-            worker=stack.enter_context(DockerWorker(workspace,runtime='seven'))
+            worker=stack.enter_context(DockerWorker(workspace,runtime='seven',retention=retention))
             adapter=ProviderCLI(provider,output/'trace',lambda c,t:worker.execute(c,timeout=t,output_limit=256*1024),lambda:source_digest(worker),model=model,effort=effort,binary=binary)
             stack.callback(adapter.close)
             binding=bound_identity(adapter,worker);validate_qualification(qualification,binding)
@@ -125,15 +160,7 @@ def run_subscription(task,language,output,*,provider,model,effort,tests='T1',see
             persist(output/'result.json',result)
             def invoke(prompt,session,seconds):
                 invocation=adapter.invoke(prompt,session,seconds)
-                if not invocation.get('quiescent',False):
-                    worker.close()
-                    invocation['artifact_available']=False
-                elif worker.alive:
-                    export_workspace(worker,workspace)
-                    invocation['artifact_available']=True
-                else:
-                    invocation.update(status='timeout',artifact_available=False,error='candidate_worker_retired; final source unavailable')
-                return invocation
+                return capture_invocation(worker,workspace,invocation)
             collection=collect(workspace,output/'collection',f'Implement /workspace/TASK.md in {language}. Read it using sandbox_shell. Edit src/ only, preserving scaffold files. Complete and verify the requirements with the supplied offline toolchain.',invoke,
                                base_seconds=base_seconds,continuation_seconds=continuation_seconds)
             collection['usage_summary']=summarize_invocations(collection['invocations'])

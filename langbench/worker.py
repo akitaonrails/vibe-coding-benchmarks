@@ -5,6 +5,7 @@ from pathlib import Path, PurePosixPath
 import shutil
 import tempfile
 import uuid
+import time
 from .core import copy_workspace, digest_tree, task_path, TASKS
 from .process import execute
 
@@ -15,7 +16,9 @@ def reject_mounted_controller_assets(mounted_roots):
             raise RuntimeError('controller or private task assets would be exposed through a runtime mount')
 
 class DockerWorker:
-    def __init__(self, source, *, image='alpine:3.22', runtime='historical'):
+    def __init__(self, source, *, image='alpine:3.22', runtime='historical', retention='legacy'):
+        if retention not in ('legacy','seal-v1'):raise ValueError('unknown retention policy')
+        self.retention=retention;self.admission_closed=False;self.retained_source=None;self.retention_receipt=None;self._retained_temp=None
         if runtime not in ('historical','seven'):
             raise ValueError('unknown worker runtime')
         self.runtime=runtime
@@ -107,21 +110,28 @@ for entry in json.load(sys.stdin):
                 if copied['returncode']:
                     raise RuntimeError('worker staging failed: '+copied['stderr'][:500])
             self.qualification=self.qualify()
+            if self.retention!='legacy':self.qualification['artifact_retention_policy']=self.retention
         except Exception:
             self.close()
             raise
 
-    def raw(self, argv, *, stdin='', timeout=30, output_limit=4*1024*1024):
+    def raw(self, argv, *, stdin='', timeout=30, output_limit=4*1024*1024, retain_timeout=False):
         if not self.alive:
             raise RuntimeError('worker retired')
         result=execute(['docker','exec','-i',self.name,*argv],stdin=stdin,timeout=timeout,output_limit=output_limit)
-        if result['termination']:
+        if result['termination'] and not (retain_timeout and result['termination']=='timeout'):
             self.close()
         return result
 
     def execute(self, command, *, stdin='', timeout=30, output_limit=4*1024*1024):
+        if self.admission_closed:raise RuntimeError('candidate admission closed')
         argv=['/usr/bin/sh','-c',command] if isinstance(command,str) else command
-        result=self.raw(argv,stdin=stdin,timeout=timeout,output_limit=output_limit)
+        command_started=time.monotonic()
+        result=self.raw(argv,stdin=stdin,timeout=timeout,output_limit=output_limit,retain_timeout=self.retention=='seal-v1')
+        timed_out=result['termination']=='timeout' and self.retention=='seal-v1'
+        if timed_out:
+            self.admission_closed=True
+            self.retention_receipt={'policy':'seal-v1','cutoff_monotonic':command_started+timeout,'timeout_observed_monotonic':time.monotonic(),'artifact_available':False}
         if self.alive:
             # No candidate process may survive the command or drift a snapshot.
             cleanup=self.raw(['/usr/bin/python3','-I','-c',
@@ -141,10 +151,43 @@ for p in os.listdir('/proc'):
    if state!='Z':raise RuntimeError('candidate process survived cleanup')
   except FileNotFoundError:pass
 ''',str(self.supervisor_pid)],timeout=5)
-            if cleanup['returncode']:
+            if cleanup['returncode'] or cleanup.get('termination'):
                 self.close()
-                result['termination']='cleanup_failed'
+                result['cleanup_error']='candidate_cleanup_failed'
+                if not timed_out:result['termination']='cleanup_failed'
+            elif timed_out:
+                self.retention_receipt['writers_stopped_monotonic']=time.monotonic()
+                self._seal_source()
+        if timed_out:
+            result['artifact_retention']=self.retention_receipt
+            self.close()
         return result
+
+    def _seal_source(self):
+        # Only called after candidate writers are stopped or proven already quiescent.
+        self.admission_closed=True
+        if self.retention_receipt is None:
+            now=time.monotonic()
+            self.retention_receipt={'policy':'seal-v1','cutoff_monotonic':now,'writers_stopped_monotonic':now,'artifact_available':False}
+        try:
+            self._retained_temp=tempfile.TemporaryDirectory(prefix='langbench-sealed-')
+            target=Path(self._retained_temp.name)/'source'
+            self.export(target,source_only=True)
+            if not (target/'src').is_dir():raise ValueError('missing submitted source')
+            self.retained_source=target
+            sealed=time.monotonic()
+            self.retention_receipt.update(artifact_available=True,source_sha256=digest_tree(target/'src'),
+                sealed_monotonic=sealed,seal_lag_seconds=sealed-self.retention_receipt['cutoff_monotonic'])
+        except Exception as error:
+            self.retained_source=None
+            self.retention_receipt['error_type']=type(error).__name__
+        return self.retention_receipt
+
+    def seal_quiescent(self):
+        if self.retention!='seal-v1':raise RuntimeError('sealing is not enabled')
+        if self.retained_source is not None:return self.retention_receipt
+        if not self.alive:return self.retention_receipt
+        return self._seal_source()
 
     def qualify(self):
         script='''import json,pathlib,socket,importlib.util
@@ -177,20 +220,24 @@ print(json.dumps(r))'''
             info['packages_sha256']=self.runtime_config['packages_sha256']
         return info
 
-    def export(self, destination):
+    def export(self, destination, *, source_only=False):
         """Export only bounded regular files; validate serialized paths before writes."""
-        script='''import os,json,base64,stat
+        script='''import os,json,base64,stat,sys
+source_only=sys.argv[1]=='1'
 root='/workspace';out=[];size=0;count=0
 for directory,dirs,files in os.walk(root,followlinks=False):
- if directory==root:dirs[:]=[d for d in dirs if d not in ('target','.git','__pycache__')];files=[f for f in files if f not in ('target','.git','__pycache__')]
+ if directory==root:
+  if source_only:dirs[:]=[d for d in dirs if d=='src'];files=[]
+  else:dirs[:]=[d for d in dirs if d not in ('target','.git','__pycache__')];files=[f for f in files if f not in ('target','.git','__pycache__')]
  for name in dirs+files:
   p=os.path.join(directory,name);s=os.lstat(p);count+=1
   if count>10000 or not (stat.S_ISREG(s.st_mode) or stat.S_ISDIR(s.st_mode)):raise ValueError('invalid export')
+  if source_only and stat.S_ISREG(s.st_mode) and s.st_nlink!=1:raise ValueError('source hardlink rejected')
   size+=s.st_size if stat.S_ISREG(s.st_mode) else 0
   if size>10485760:raise ValueError('export exceeds size bound')
   out.append({'path':os.path.relpath(p,root),'mode':stat.S_IMODE(s.st_mode),'directory':stat.S_ISDIR(s.st_mode),'data':base64.b64encode(open(p,'rb').read()).decode() if stat.S_ISREG(s.st_mode) else None})
 print(json.dumps(out))'''
-        result=self.raw(['/usr/bin/python3','-I','-c',script],output_limit=16*1024*1024)
+        result=self.raw(['/usr/bin/python3','-I','-c',script,'1' if source_only else '0'],output_limit=16*1024*1024)
         if result['returncode'] or result['termination']:
             raise ValueError('worker export rejected invalid or oversized artifact')
         entries=json.loads(result['stdout'])
@@ -211,8 +258,16 @@ print(json.dumps(out))'''
 
     def close(self):
         if self.alive:
-            self.alive=False
-            execute(['docker','rm','--force',self.name],timeout=15)
+            if self.retention=='seal-v1':
+                removed=execute(['docker','rm','--force',self.name],timeout=15)
+                if removed['returncode'] or removed.get('termination'):
+                    raise RuntimeError('terminal worker removal unverified')
+                self.alive=False
+            else:
+                self.alive=False
+                execute(['docker','rm','--force',self.name],timeout=15)
 
     def __enter__(self):return self
-    def __exit__(self,*args):self.close()
+    def __exit__(self,*args):
+        self.close()
+        if self._retained_temp is not None:self._retained_temp.cleanup()

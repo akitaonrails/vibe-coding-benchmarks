@@ -71,7 +71,7 @@ def collect(workspace, output, prompt, invoke, *, base_seconds=900, continuation
         if index:
             ledger({'event':'invocation_returned','intervention_index':index-1,'timestamp':time.time(),'status':result.get('status')})
             receipt['interventions'][index-1]['delivery_status']='invocation_returned'
-        if result.get('status') not in ('handoff','timeout','quota','infrastructure_error'):
+        if result.get('status') not in ('handoff','timeout','quota','model_output_limit','infrastructure_error'):
             raise ValueError('invalid adapter status')
         if session is not None and result.get('session_id') != session:
             result = {**result,'status':'infrastructure_error','error':'resume_session_changed'}
