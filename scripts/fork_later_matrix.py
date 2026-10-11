@@ -52,12 +52,38 @@ def allowed_change(before, after):
         raise ValueError('only a changed claude_subscriptions.py binding is allowed')
 
 
+def policy_change(old_binding, new_binding):
+    comparable=copy.deepcopy(old_binding)
+    comparable['adapter_source_sha256']=new_binding['adapter_source_sha256']
+    old_policy=old_binding.get('adapter', {}).get('transport_policy')
+    new_policy=new_binding.get('adapter', {}).get('transport_policy')
+    if (old_policy,new_policy) in ((None,'serial-admission-v2'),('serial-admission-v2','serial-admission-v3')):
+        comparable['adapter']['transport_policy']=new_policy
+    if comparable!=new_binding:
+        raise ValueError('qualification changed beyond allowed adapter source/policy')
+
+
+def qualification_for_cell(directory, ident):
+    directory=Path(directory)
+    path=directory/'instrumentation-epoch.json'
+    if path.exists():
+        epoch=json.loads(path.read_bytes())
+        if ident in epoch['consumed_ids']:
+            return qualification_for_cell(directory/'lineage/predecessor', ident)
+    return json.loads((directory/'qualification-claude.json').read_bytes())
+
+
+def epoch_for_cell(directory, ident):
+    q=qualification_for_cell(directory,ident)
+    return q['binding']['adapter'].get('transport_policy') or 'original'
+
+
 def fork(predecessor, destination, new_qualification, *, reason, current_binding=None):
     predecessor=Path(predecessor).resolve();destination=Path(destination).resolve()
     if destination.exists() or destination.is_relative_to(predecessor) or predecessor.is_relative_to(destination):
         raise ValueError('new separate destination required')
     if not isinstance(reason,str) or not reason.strip():raise ValueError('incident reason required')
-    if (predecessor/'instrumentation-epoch.json').exists():raise ValueError('nested successor requires a separately reviewed migration')
+    validate_lineage(predecessor)
     original=inventory(predecessor)
     state=json.loads((predecessor/'matrix.json').read_bytes());plan=json.loads((predecessor/'plan.json').read_bytes())
     cells=validate_plan(plan)
@@ -91,12 +117,10 @@ def fork(predecessor, destination, new_qualification, *, reason, current_binding
     old_binding=qualification(old_q,before);new_binding=qualification(new_q,after)
     for ident in consumed:
         result=json.loads((predecessor/ident/'result.json').read_bytes())
-        if result.get('manifest') and (result['manifest'].get('binding')!=old_binding or result['manifest'].get('qualification_sha256')!=sha(old_q)):
+        epoch_q=qualification_for_cell(predecessor,ident)
+        if result.get('manifest') and (result['manifest'].get('binding')!=epoch_q['binding'] or result['manifest'].get('qualification_sha256')!=sha(epoch_q)):
             raise ValueError('consumed manifest qualification mismatch')
-    comparable=copy.deepcopy(old_binding);comparable['adapter_source_sha256']=new_binding['adapter_source_sha256']
-    if 'transport_policy' not in old_binding.get('adapter', {}) and new_binding.get('adapter', {}).get('transport_policy') == 'serial-admission-v2':
-        comparable['adapter']['transport_policy'] = 'serial-admission-v2'
-    if comparable!=new_binding:raise ValueError('qualification changed beyond allowed adapter source')
+    policy_change(old_binding,new_binding)
     successor=copy.deepcopy(state);successor['input_binding']=after
     successor['qualification_sha256']={'claude':hashlib.sha256(new_bytes).hexdigest()}
     lineage={'schema_version':1,'kind':'claude_instrumentation_successor','reason':reason,
@@ -104,12 +128,14 @@ def fork(predecessor, destination, new_qualification, *, reason, current_binding
              'predecessor_matrix_sha256':original['matrix.json'], 'before_binding':before,'after_binding':after,
              'old_qualification_sha256':digest(old_path),'new_qualification_sha256':hashlib.sha256(new_bytes).hexdigest(),
              'consumed_ids':consumed,'pending_ids':pending,'predecessor_inventory':original,
-             'epochs':{'predecessor':consumed,'successor':pending}}
+             'epochs':{'predecessor':consumed,'successor':pending},'archive_complete':True,
+             'cell_epochs':{ident:epoch_for_cell(predecessor,ident) for ident in consumed}}
+    lineage['cell_epochs'].update({ident:new_binding['adapter'].get('transport_policy') or 'original' for ident in pending})
     destination.mkdir(parents=True)
     try:
-        archive=destination/'lineage/predecessor';archive.mkdir(parents=True)
-        for name in ('matrix.json','plan.json','qualification-claude.json'):
-            shutil.copyfile(predecessor/name,archive/name)
+        archive=destination/'lineage/predecessor'
+        archive.parent.mkdir(parents=True)
+        shutil.copytree(predecessor,archive)
         for path in predecessor.iterdir():
             if path.is_file() and path.name not in ('matrix.json','qualification-claude.json'):
                 shutil.copyfile(path,destination/path.name)
@@ -137,12 +163,16 @@ def validate_lineage(directory):
     if digest(archive/'matrix.json')!=epoch['predecessor_matrix_sha256']:raise ValueError('archived predecessor mismatch')
     if digest(archive/'plan.json')!=epoch['plan_sha256'] or digest(directory/'plan.json')!=epoch['plan_sha256']:raise ValueError('lineage plan mismatch')
     if digest(archive/'qualification-claude.json')!=epoch['old_qualification_sha256'] or digest(directory/'qualification-claude.json')!=epoch['new_qualification_sha256']:raise ValueError('lineage qualification mismatch')
+    if epoch.get('archive_complete') and inventory(archive)!=epoch['predecessor_inventory']:
+        raise ValueError('archived predecessor inventory mismatch')
+    validate_lineage(archive)
     old=json.loads((archive/'matrix.json').read_bytes());current=json.loads((directory/'matrix.json').read_bytes())
     allowed_change(epoch['before_binding'],epoch['after_binding'])
     if old['input_binding']!=epoch['before_binding'] or current['input_binding']!=epoch['after_binding']:raise ValueError('lineage source binding mismatch')
     old_q=json.loads((archive/'qualification-claude.json').read_bytes())
     new_q=json.loads((directory/'qualification-claude.json').read_bytes())
-    qualification(old_q,epoch['before_binding']);qualification(new_q,epoch['after_binding'])
+    old_binding=qualification(old_q,epoch['before_binding']);new_binding=qualification(new_q,epoch['after_binding'])
+    policy_change(old_binding,new_binding)
     if old['qualification_sha256']!={'claude':epoch['old_qualification_sha256']} or current['qualification_sha256']!={'claude':epoch['new_qualification_sha256']}:raise ValueError('lineage state qualification mismatch')
     consumed=[s['id'] for s in old['cells'] if s['state']!='pending'];pending=[s['id'] for s in old['cells'] if s['state']=='pending']
     if consumed!=epoch['consumed_ids'] or pending!=epoch['pending_ids'] or epoch['epochs']!={'predecessor':consumed,'successor':pending}:raise ValueError('lineage epoch membership mismatch')
@@ -151,6 +181,10 @@ def validate_lineage(directory):
         if item['id'] in consumed:
             if current_cells.get(item['id'])!=item:raise ValueError('consumed attempt was changed or retried')
             if digest(directory/item['id']/'result.json')!=item['result_sha256']:raise ValueError('consumed receipt changed')
+    if 'cell_epochs' in epoch:
+        expected={ident:epoch_for_cell(archive,ident) for ident in consumed}
+        expected.update({ident:new_binding['adapter'].get('transport_policy') or 'original' for ident in pending})
+        if epoch['cell_epochs']!=expected:raise ValueError('nested epoch attribution mismatch')
     return epoch
 
 

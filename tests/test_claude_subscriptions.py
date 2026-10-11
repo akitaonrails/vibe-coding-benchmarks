@@ -183,6 +183,42 @@ class ClaudeTests(unittest.TestCase):
             with transport.condition:transport.active=0;transport.condition.notify_all()
             transport.close()
 
+    def test_known_auxiliary_paths_denied_without_inference_or_fatal(self):
+        class Response(io.BytesIO):
+            status=200;headers={'Content-Type':'text/event-stream'}
+        class Opener:
+            def __init__(self):self.urls=[]
+            def open(self,req,**kwargs):
+                self.urls.append(req.full_url);return Response(b'data: {"type":"message_stop"}\n\n')
+        opener=Opener();transport=c.ClaudeTransport(opener);transport.allowance_checked=True
+        try:
+            def send(path,payload):
+                req=urllib.request.Request(transport.base_url+path,data=json.dumps(payload).encode(),headers={'Authorization':'Bearer sk-ant-oat-fixture'})
+                try:
+                    with urllib.request.urlopen(req,timeout=2) as response:response.read();return response.status
+                except urllib.error.HTTPError as error:return error.code
+            # Auxiliaries can arrive during an active Messages stream; they are never admitted upstream.
+            transport.active=1
+            for path in c.AUXILIARY_PATHS:
+                self.assertEqual(send(path,{'private_body':'must not be logged'}),404)
+            transport.active=0
+            self.assertFalse(opener.urls);self.assertIsNone(transport.fatal)
+            self.assertEqual(len(transport.denied_auxiliary_requests),3)
+            self.assertNotIn('private_body',json.dumps(transport.denied_auxiliary_requests))
+            self.assertEqual(send('/v1/messages',body()),200);self.assertEqual(opener.urls,[c.ENDPOINT])
+            self.assertEqual(send('/v1/messages/count_tokens?secret=do-not-log',{}),502)
+            self.assertEqual(transport.fatal,'path rejected')
+            self.assertEqual(transport.rejections[-1]['endpoint_category'],'unknown')
+            digest=transport.rejections[-1]['path_sha256']
+            self.assertEqual(send('/v1/messages/count_tokens?other=also-private',{}),502)
+            self.assertEqual(transport.rejections[-1]['path_sha256'],digest)
+            import hashlib
+            self.assertEqual(digest,hashlib.sha256(b'/v1/messages/count_tokens').hexdigest())
+            self.assertNotIn('do-not-log',json.dumps(transport.rejections))
+            self.assertEqual(len(opener.urls),1)
+        finally:
+            transport.close()
+
     def test_allowance_extra_usage_denied(self):
         class Response(io.BytesIO):status=200
         t=c.ClaudeTransport.__new__(c.ClaudeTransport)
@@ -196,7 +232,7 @@ class ClaudeTests(unittest.TestCase):
         def settle():
             if settle_error:raise RuntimeError('unsettled')
         adapter.bridge=SimpleNamespace(records=[],fatal=None,deadline=0,settle=lambda:None)
-        adapter.transport=SimpleNamespace(records=[request()],base_url='http://127.0.0.1:1',fatal=None,rejections=[],rate_latched=False,settle=settle,allowance={'extra_usage_enabled':False})
+        adapter.transport=SimpleNamespace(records=[request()],base_url='http://127.0.0.1:1',fatal=None,rejections=[],denied_auxiliary_requests=[],rate_latched=False,settle=settle,allowance={'extra_usage_enabled':False})
         return adapter
 
     def test_timeout_truncated_stream_preserves_evidence(self):
@@ -209,7 +245,7 @@ class ClaudeTests(unittest.TestCase):
             self.assertEqual(result['cleanup_unsettled'][0]['component'],'transport')
             self.assertTrue(Path(result['raw_path']).exists());self.assertTrue(result['events'])
             self.assertFalse(result['usage_coverage_verified'])
-            self.assertEqual(result['transport_diagnostics'],{'fatal':None,'rejections':[]})
+            self.assertEqual(result['transport_diagnostics'],{'fatal':None,'rejections':[],'denied_auxiliary_requests':[]})
 
     def test_no_api_auth_fallback_and_session_resume(self):
         with tempfile.TemporaryDirectory() as d:

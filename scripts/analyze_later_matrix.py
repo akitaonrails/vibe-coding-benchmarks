@@ -10,7 +10,7 @@ sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts import analyze_subscription_matrix as base
 from langbench.later_matrix import validate_plan
-from scripts.fork_later_matrix import validate_lineage
+from scripts.fork_later_matrix import validate_lineage, epoch_for_cell
 from langbench.metrics import reconcile_provider_usage
 from langbench.claude_subscriptions import reconcile_claude_usage
 
@@ -113,7 +113,7 @@ def analyze(directory):
         report['instrumentation_lineage'] = lineage
         report['instrumentation_lineage_sha256'] = base.sha((Path(directory)/'instrumentation-epoch.json').read_bytes())
         for row in report['attempts']:
-            row['instrumentation_epoch'] = 'predecessor' if row['cell']['id'] in lineage['consumed_ids'] else 'successor'
+            row['instrumentation_epoch'] = epoch_for_cell(directory, row['cell']['id'])
         for summary in report['summary']:
             summary['instrumentation_epochs'] = dict(Counter(row['instrumentation_epoch'] for row in report['attempts']
                 if all(row['cell'][key] == summary[key] for key in ('language','provider','model','tests'))))

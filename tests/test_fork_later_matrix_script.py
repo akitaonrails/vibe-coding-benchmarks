@@ -1,5 +1,6 @@
 """Offline preservation and no-retry successor fixtures."""
 import copy
+import hashlib
 import json
 from pathlib import Path
 import tempfile
@@ -47,7 +48,7 @@ class ForkTests(unittest.TestCase):
         self.assertEqual(called,epoch['pending_ids']);self.assertEqual(state['cells'][:4],self.state['cells'][:4])
         self.assertEqual(f.inventory(self.old),inventory)
         report=analyze(self.new)
-        self.assertEqual([r['instrumentation_epoch'] for r in report['attempts'][:4]],['predecessor']*4)
+        self.assertEqual([r['instrumentation_epoch'] for r in report['attempts'][:4]],['original']*4)
         self.assertEqual(len(report['instrumentation_lineage']['pending_ids']),24)
 
     def test_exact_transport_policy_transition(self):
@@ -59,6 +60,45 @@ class ForkTests(unittest.TestCase):
         self.newq['binding']['adapter']['transport_policy']='anything-else'
         self.newq['binding_sha256']=f.sha(self.newq['binding']);self.write(self.qpath,self.newq)
         with self.assertRaisesRegex(ValueError,'beyond allowed'):self.fork()
+
+    def test_nested_successor_preserves_each_epoch_and_no_retries(self):
+        self.newq['binding']['adapter']['transport_policy']='serial-admission-v2'
+        self.newq['binding_sha256']=f.sha(self.newq['binding']);self.write(self.qpath,self.newq)
+        # Bind original consumed manifests to the original qualification.
+        for index in range(4):
+            cell=self.plan['cells'][index]
+            manifest={k:v for k,v in cell.items() if k!='id'}
+            manifest.update(binding=self.oldq['binding'],qualification_sha256=f.sha(self.oldq))
+            result={'manifest':manifest,'manifest_sha256':f.digest(self.old/'plan.json')}
+            result['manifest_sha256']=hashlib.sha256(json.dumps(manifest,sort_keys=True).encode()).hexdigest()
+            path=self.old/cell['id']/'result.json';self.write(path,result)
+            self.state['cells'][index]['result_sha256']=f.digest(path)
+        self.write(self.old/'matrix.json',self.state)
+        original=f.inventory(self.old);self.fork()
+        cell=self.plan['cells'][4];directory=self.new/cell['id'];directory.mkdir()
+        manifest={k:v for k,v in cell.items() if k!='id'}
+        manifest.update(binding=self.newq['binding'],qualification_sha256=f.sha(self.newq))
+        result={'validity':'infrastructure_invalid','manifest':manifest,
+                'manifest_sha256':hashlib.sha256(json.dumps(manifest,sort_keys=True).encode()).hexdigest()}
+        self.write(directory/'result.json',result)
+        state=json.loads((self.new/'matrix.json').read_text())
+        state['cells'][4].update(state='infrastructure_invalid',result_sha256=f.digest(directory/'result.json'))
+        self.write(self.new/'matrix.json',state)
+        predecessor_inventory=f.inventory(self.new)
+        latest=copy.deepcopy(self.after);latest['harness']['claude_subscriptions.py']='c'*64
+        q=self.makeq(latest);q['binding']['adapter']['transport_policy']='serial-admission-v3';q['binding_sha256']=f.sha(q['binding'])
+        qpath=self.root/'q3.json';self.write(qpath,q);dest=self.root/'third'
+        epoch=f.fork(self.new,dest,qpath,reason='known auxiliary path',current_binding=latest)
+        self.assertEqual(f.inventory(self.old),original);self.assertEqual(f.inventory(self.new),predecessor_inventory)
+        ids=[c['id'] for c in self.plan['cells']]
+        self.assertEqual([f.epoch_for_cell(dest,i) for i in ids[:6]],['original']*4+['serial-admission-v2','serial-admission-v3'])
+        self.assertEqual(len(epoch['pending_ids']),23)
+        called=[]
+        def runner(task,language,path,**kwargs):called.append(Path(path).name);return {'validity':'valid_development'}
+        run_matrix(dest/'plan.json',dest,qualification=qpath,resume=True,runner=runner,binding=latest)
+        self.assertEqual(called,ids[5:]);f.validate_lineage(dest)
+        (dest/'lineage/predecessor'/ids[4]/'result.json').write_text('{}')
+        with self.assertRaisesRegex(ValueError,'inventory mismatch'):f.validate_lineage(dest)
 
     def test_result_tamper_rejected_without_destination(self):
         (self.old/self.plan['cells'][1]['id']/'result.json').write_text('{}')

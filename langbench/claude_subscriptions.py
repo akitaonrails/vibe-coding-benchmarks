@@ -41,7 +41,12 @@ REJECTION_REASONS = frozenset(('invalid request shape','streaming request requir
     'framing rejected','incomplete request','response bound','allowance unavailable','allowance bound',
     'extra usage must be disabled','allowance unknown','pending_request_bound','request_admission_timeout',
     'invalid_transport_data','invalid_response_event','invalid_response_message','response_model_mismatch',
-    'response_capability_mismatch','concurrent_request_rejected'))
+    'response_capability_mismatch','concurrent_request_rejected','auxiliary_request_bound'))
+AUXILIARY_PATHS={'/v1/messages/count_tokens':'count_tokens',
+    '/v1/messages/count_tokens?beta=true':'count_tokens','/v1/messages/cache_touch':'cache_touch'}
+
+def endpoint_category(path):
+    return AUXILIARY_PATHS.get(path,'messages' if path in ('/v1/messages','/v1/messages?beta=true') else 'unknown')
 
 
 
@@ -87,7 +92,7 @@ def native_usage(request):
 class ClaudeTransport:
     """Local fixed Messages destination, enforcing subscription and request capabilities."""
     def __init__(self, opener=None):
-        self.records=[]; self.rejections=[]; self.fatal=None; self.rate_latched=False
+        self.records=[]; self.rejections=[]; self.denied_auxiliary_requests=[]; self.fatal=None; self.rate_latched=False
         self.condition=threading.Condition(); self.active=0; self.pending=0; self.accepting=True; self.responses=[]
         self.deadline=float('inf')
         self.allowance_checked=False; self.allowance=None
@@ -97,6 +102,15 @@ class ClaudeTransport:
             protocol_version='HTTP/1.0'
             def log_message(self, *args): pass
             def do_POST(self):
+                if self.path in AUXILIARY_PATHS:
+                    with owner.condition:
+                        if not owner.accepting:self.send_error(503);return
+                        if len(owner.denied_auxiliary_requests)>=128:
+                            owner.reject('auxiliary_request_bound',False,endpoint_category(self.path))
+                            self.send_error(503);return
+                        owner.denied_auxiliary_requests.append({'endpoint_category':endpoint_category(self.path),
+                            'reason':'blocked_noninference_endpoint','upstream_sent':False,'http_status':404,'observed_at':time.time()})
+                    self.send_error(404,'Auxiliary endpoint unavailable');return
                 with owner.condition:
                     if not owner.accepting: self.send_error(503); return
                     admission_started=time.monotonic()
@@ -163,7 +177,8 @@ class ClaudeTransport:
                         evidence['response_complete']=True
                 except Exception as error:
                     if isinstance(error,ValueError):
-                        owner.reject(str(error), bool(evidence and evidence.get('upstream_sent')))
+                        owner.reject(str(error), bool(evidence and evidence.get('upstream_sent')),endpoint_category(self.path),
+                                     hashlib.sha256(self.path.split('?',1)[0].encode()).hexdigest() if str(error)=='path rejected' else None)
                     elif evidence is not None: evidence['transport_error']=type(error).__name__
                     try: self.send_error(502)
                     except OSError: pass
@@ -175,10 +190,13 @@ class ClaudeTransport:
         self.thread=threading.Thread(target=self.server.serve_forever,daemon=True); self.thread.start()
         self.base_url='http://127.0.0.1:'+str(self.server.server_port)
 
-    def reject(self, reason, upstream_sent):
+    def reject(self, reason, upstream_sent, category='response', path_sha256=None):
         safe=reason if reason in REJECTION_REASONS else 'invalid_transport_data'
         self.fatal=safe
-        self.rejections.append({'reason':safe,'upstream_sent':upstream_sent,'observed_at':time.time()})
+        self.rejections.append({'reason':safe,'upstream_sent':upstream_sent,'observed_at':time.time(),
+                                'endpoint_category':category if category in ('messages','count_tokens','cache_touch','unknown','response') else 'unknown'})
+        if isinstance(path_sha256,str) and re.fullmatch('[0-9a-f]{64}',path_sha256):
+            self.rejections[-1]['path_sha256']=path_sha256
 
     def check_allowance(self, authorization):
         request=urllib.request.Request('https://api.anthropic.com/api/oauth/usage',
@@ -285,7 +303,7 @@ class ClaudeCLI:
         self.mcp=self.home/'mcp.json';write_private(self.mcp,json.dumps({'mcpServers':{'langbench':{'command':command[0],'args':command[1:]}}}))
         self.settings=self.home/'settings.json';write_private(self.settings,json.dumps({'disableAllHooks':True,'autoMemoryEnabled':False,'enabledPlugins':DISABLED_PLUGINS,'effortLevel':EFFORT,'permissions':{'allow':[TOOL],'defaultMode':'dontAsk'}}))
         self.identity={'provider':'claude','model':MODEL,'effort':EFFORT,'version':VERSION,'binary_sha256':BINARY_SHA,
-            'auth_mode':'canonical_subscription_oauth','endpoint':ENDPOINT,'tool':TOOL,'policy_version':'claude-mcp-only-v1','transport_policy':'serial-admission-v2',
+            'auth_mode':'canonical_subscription_oauth','endpoint':ENDPOINT,'tool':TOOL,'policy_version':'claude-mcp-only-v1','transport_policy':'serial-admission-v3',
             'settings':json.loads(self.settings.read_text()),'environment':{k:v for k,v in self.env.items() if k!='HOME'}}
 
     def argv(self,prompt,session):
@@ -300,6 +318,7 @@ class ClaudeCLI:
         if session and session!=self.session: raise ValueError('session continuity mismatch')
         if not self.session: self.session=str(uuid.uuid4())
         start=time.monotonic();tool_start=len(self.bridge.records);request_start=len(self.transport.records)
+        rejection_start=len(self.transport.rejections);auxiliary_start=len(self.transport.denied_auxiliary_requests)
         self.bridge.deadline=0;self.transport.accepting=True;self.transport.allowance_checked=False
         self.index+=1;directory=self.output/str(self.index);directory.mkdir()
         # Reject managed policy injection before inference. No global file is modified.
@@ -333,7 +352,8 @@ class ClaudeCLI:
             'artifact_available':False,'usage_records':[],'usage_coverage_verified':False,'subscription_auth_verified':True,
             'allowance':self.transport.allowance,
             'transport_diagnostics':{'fatal':self.transport.fatal if self.transport.fatal in REJECTION_REASONS else ('invalid_transport_data' if self.transport.fatal else None),
-                                     'rejections':list(self.transport.rejections)},
+                                     'rejections':list(self.transport.rejections[rejection_start:]),
+                                     'denied_auxiliary_requests':list(self.transport.denied_auxiliary_requests[auxiliary_start:])},
             'bridge_boundary_rejected':bool(self.bridge.fatal)}
         try:
             events,text,result,initialized=parse_events(raw['stdout'],self.session,truncated=raw['termination'] in ('timeout','candidate_timeout'))
