@@ -27,3 +27,7 @@ These calls are harness setup effort, not candidate coding effort. Failed qualif
 | `opus-medium-qualification-2` | Passed; final evidence review accepted | 4,983 | Explicitly disabled all pinned built-in plugins; exact wire identity, OAuth route, tool inventory, resumed session and native accounting passed |
 
 The first Opus failure was corrected by explicitly disabling all 11 built-in plugins identified in the pinned CLI; an empty map had preserved defaults. The failed receipt remains unchanged. Final independent review accepted both current qualifications and their source/runtime bindings. No coding cell was consumed by these setup probes.
+
+## Opus instrumentation successors
+
+After three consumed infrastructure incidents, the Opus cohort proceeds through explicit, archived instrumentation successors; no consumed attempt is retried. `results/opus-medium-matrix-v3` preserves the original four consumed cells and one v2 cell, with 23 cells pending under v3 at its creation. The final report must retain per-cell epoch attribution and qualification setup costs. Original boundary causes and the exact v2 rejected path remain unknown; locally reproduced concurrency and pinned-source auxiliary-path handling are engineering evidence, not retrospective causal proof. See [the follow-up report scaffold](followup-matrix-results.md) for qualifications 3–6, preflight pressure and timing limits. Collection outcomes remain pending closure.

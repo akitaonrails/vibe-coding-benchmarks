@@ -4,6 +4,7 @@ import argparse
 from collections import Counter
 import statistics
 import json
+import math
 from pathlib import Path
 import sys
 sys.dont_write_bytecode = True
@@ -12,7 +13,7 @@ from scripts import analyze_subscription_matrix as base
 from langbench.later_matrix import validate_plan
 from scripts.fork_later_matrix import validate_lineage, epoch_for_cell
 from langbench.metrics import reconcile_provider_usage
-from langbench.claude_subscriptions import reconcile_claude_usage
+from langbench.claude_subscriptions import reconcile_claude_usage, proven_unsent
 
 VERSION = 'later-subscription-analysis-v1'
 
@@ -55,6 +56,48 @@ def native_usage(provider, invocations):
     raise ValueError('unsupported later provider')
 
 
+def operational_effort(provider, invocations):
+    """Observed overhead, never subtracted from candidate wall time."""
+    def numeric(value):
+        return type(value) in (int, float) and math.isfinite(value) and value >= 0
+    rows = []
+    for invocation in invocations:
+        requests = invocation.get('request_records')
+        available = provider == 'claude' and isinstance(requests, list)
+        interval = None
+        if available:
+            first_sent = next((n for n, request in enumerate(requests) if request.get('upstream_sent') is True), None)
+            if first_sent is not None:
+                prefix = requests[:first_sent+1]
+                times = [request.get('started_at') for request in prefix]
+                if (all(proven_unsent(request) for request in prefix[:-1]) and all(numeric(t) for t in times)
+                        and times == sorted(times)):
+                    interval = times[-1] - times[0]
+        def reported(key):
+            value = invocation.get(key)
+            return value if numeric(value) else None
+        rows.append({'index':invocation.get('index'),
+                     'operational_request_count':len(requests) if available else None,
+                     'proven_unsent_request_count':sum(proven_unsent(r) for r in requests) if available else None,
+                     'reported_allowance_http_seconds':reported('allowance_preflight_seconds') if provider == 'claude' else None,
+                     'allowance_preflight_seconds':reported('allowance_preflight_seconds'),
+                     'auth_preflight_seconds':reported('auth_preflight_seconds'),
+                     'cleanup_seconds':reported('cleanup_seconds'),
+                     'initial_preflight_retry_interval_seconds':interval})
+    aggregate = {}
+    fields = ('operational_request_count','proven_unsent_request_count','reported_allowance_http_seconds',
+              'allowance_preflight_seconds','auth_preflight_seconds','cleanup_seconds','initial_preflight_retry_interval_seconds')
+    for field in fields:
+        values = [row[field] for row in rows if row[field] is not None]
+        complete = bool(rows) and len(values) == len(rows)
+        aggregate[field] = {'total':sum(values) if complete else None,
+                            'known_subtotal':sum(values) if values else None,
+                            'known_invocations':len(values),'invocations':len(rows),'complete':complete}
+    return {'invocations':rows,'aggregate':aggregate,
+            'retry_interval_scope':'Lower bound from first observed proven-unsent request start to first sent request start; no sent request or unknown prefix yields unknown.',
+            'timing_limit':'Wall-clock timestamps may be affected by clock adjustment. HTTP call durations exclude retry backoff. No subtraction yields pure coding or thinking time.'}
+
+
 def later_row(cell, state, result, directory, override, receipt_sha):
     row = base.attempt_row(cell, state, result, directory, override, receipt_sha)
     collection = result.get('collection') or result.get('partial_collection') or {}
@@ -65,6 +108,7 @@ def later_row(cell, state, result, directory, override, receipt_sha):
         point['usage'] = native_usage(cell['provider'], prefix)
         point['usage']['scope'] = 'Cumulative candidate work through this checkpoint, including prior invocations.'
     row['initial_usage'] = native_usage(cell['provider'], invocations[:1])
+    row['operational_effort'] = operational_effort(cell['provider'], invocations)
     explicit = [i.get('inference_started') for i in invocations]
     requests = [request for invocation in invocations for request in invocation.get('request_records', [])]
     native_responses = any(event.get('method') == 'rawResponse/completed'

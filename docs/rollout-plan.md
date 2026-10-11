@@ -1,6 +1,6 @@
 # Staged rollout and decision gates
 
-Status: proposed, not launched. The current deliverable is research and planning. Costs below are maximum agent-hours at draft time ceilings, not predicted runtime, token use or subscription allowance. Human task-authoring, porting, oracle verification and infrastructure work are additional substantial costs.
+Status: original research proposal, retained for future confirmatory work. The completed exploratory subscription campaign is documented in [the combined results](followup-matrix-results.md); its model roster and scope supersede this proposal for that campaign. Costs below are maximum agent-hours at draft time ceilings, not predicted runtime, token use or subscription allowance. Human task-authoring, porting, oracle verification and infrastructure work are additional substantial costs.
 
 ## Stage 0: implement instruments and task qualification
 

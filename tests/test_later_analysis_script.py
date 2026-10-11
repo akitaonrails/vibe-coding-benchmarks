@@ -17,6 +17,33 @@ def claude_request(identity='one', **changes):
 
 
 class LaterAnalysisTests(unittest.TestCase):
+    def test_operational_retry_interval_and_http_are_distinct(self):
+        unsent={'upstream_sent':False,'response_ids':[],'usage':{},'http_status':429,'started_at':100}
+        invocation={'index':0,'allowance_preflight_seconds':0.52,'auth_preflight_seconds':0.2,
+                    'cleanup_seconds':0.1,'request_records':[unsent,{**unsent,'started_at':110},
+                                                              {'upstream_sent':True,'started_at':130}]}
+        result=a.operational_effort('claude',[invocation])
+        row=result['invocations'][0]
+        self.assertEqual(row['proven_unsent_request_count'],2)
+        self.assertEqual(row['operational_request_count'],3)
+        self.assertEqual(row['initial_preflight_retry_interval_seconds'],30)
+        self.assertEqual(row['reported_allowance_http_seconds'],0.52)
+        self.assertTrue(result['aggregate']['cleanup_seconds']['complete'])
+        invocation['request_records'][1]['response_ids']=['ambiguous']
+        result=a.operational_effort('claude',[invocation])
+        self.assertIsNone(result['invocations'][0]['initial_preflight_retry_interval_seconds'])
+
+    def test_operational_empty_missing_and_partial_coverage(self):
+        for requests in ([],[{'upstream_sent':False}], [{'upstream_sent':True}]):
+            result=a.operational_effort('claude',[{'request_records':requests}])
+            self.assertIsNone(result['invocations'][0]['initial_preflight_retry_interval_seconds'])
+            self.assertIsNone(result['aggregate']['reported_allowance_http_seconds']['total'])
+        result=a.operational_effort('claude',[{'allowance_preflight_seconds':0.4,'request_records':[]},{}])
+        aggregate=result['aggregate']['reported_allowance_http_seconds']
+        self.assertIsNone(aggregate['total']);self.assertEqual(aggregate['known_subtotal'],0.4)
+        self.assertEqual(aggregate['known_invocations'],1)
+        self.assertIsNone(a.operational_effort('codex',[{}])['aggregate']['operational_request_count']['total'])
+
     def test_codex_cumulative_continuation_and_subsets(self):
         runs=trace()
         self.assertEqual(a.native_usage('codex',runs[:1])['provider_total'],30)
