@@ -58,3 +58,34 @@ The frozen parser can encounter this classification issue again. Any further exc
 - [Pinned OpenCode output-token default](https://github.com/anomalyco/opencode/blob/aec0b9a6d8898f68f923aaf08b7306d931fd9d76/packages/opencode/src/provider/transform.ts): source evidence for the cap-origin inference.
 
 The broader matrix is still being collected. These two cells support incident diagnosis and per-attempt observations, not a completed comparison of languages, testing conditions or type-system strength.
+
+## Continued collection and automatic operational recovery
+
+A later Kimi/Haskell T0 attempt reached its 900-second deadline with all recorded
+candidate tool calls finished, but the last provider stream did not drain within
+the recorder's 15-second limit. The worker was retired before export. Its final
+receipt is infrastructure-invalid, has no safe final artifact, and records a
+known token subtotal of 280,355 rather than a complete total. Local cleanup
+finished with no remaining benchmark process or container. This is not evidence
+of either correctness or incorrectness of its final code. Root recorded the
+unchanged resumption in `results/subscription-matrix/operations.jsonl`.
+
+GLM/TypeScript T0 subsequently encountered the same clean output-length stop as
+cell 2. Its six recorded requests total 54,962 tokens; the saved starter-like
+artifact passed 1/43 private cases. An additive classification override preserves
+the original receipt. This failure mode therefore is not exclusive to Haskell.
+
+The operational monitor in `scripts/supervise_subscription_matrix.py` now waits
+for the existing collector and resumes only untouched pending cells after these
+two diagnosed signatures. It does not alter prompts, budgets, source, grades or
+qualification bindings; it never retries consumed cells. It verifies local
+cleanup, the result commitment and matching committed events for a length stop.
+A durable audit prevents repeated no-progress resumes across monitor restarts.
+An unknown incident returns to the coordinating assistant for diagnosis.
+
+Seven fake lifecycle/integrity tests and an independent bounded review passed
+before monitor launch. The separate analysis script passed 14 fake receipt tests
+and independent review. These checks validate operational and reporting behavior;
+they do not add benchmark candidate observations. Monitor/analysis development is
+AI/operator benchmark work, with human repair time still unmeasured. The final
+report must include the monitor audit and any remaining collection invalidity.
